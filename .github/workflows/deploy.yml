@@ -37,11 +37,11 @@ jobs:
       - name: Pages 設定
         uses: actions/configure-pages@v5
 
-      - name: Web を書き出し（サブパス /sansu-app/ 前提）
+      - name: Web を書き出し（サブパス /piyopiyo-sansu/ 前提）
         # EXPO_BASE_URL は app.config.js が experiments.baseUrl に反映する。
         # これによりビルド時のみサブパスが適用され、ローカル開発には影響しない。
         env:
-          EXPO_BASE_URL: /sansu-app
+          EXPO_BASE_URL: /piyopiyo-sansu
         run: npx expo export --platform web
 
       - name: Jekyll 無効化（_expo などアンダースコア始まりを配信するため）

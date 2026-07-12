@@ -34,7 +34,7 @@ export default function TitleScreen({ onPlay, onOtona }: Props) {
   return (
     <View style={styles.root}>
       <View style={styles.center}>
-        <Text style={styles.title}>さんすう</Text>
+        <Text style={styles.title}>ぴよぴよさんすう</Text>
         <Text style={styles.subtitle}>かぞえて あそぼう</Text>
 
         {/* 概念の絵: ふえる（🐥→🐥🐥🐥）/ へる（🍎🍎🍎→🍎） */}

@@ -1,4 +1,4 @@
-# さんすうアプリ（仮）
+# ぴよぴよさんすう
 
 4歳児のための、超やさしい「たしざん・ひきざん」知育アプリ。**数字の記号操作ではなく、キャラクター（モノ）が増えたり減ったりするのを見て、指でさして数える**グラフィカルなさんすう。ひよこが増える →「ぜんぶで いくつ?」、りんごが食べられる →「のこりは いくつ?」。正解すると1つずつハイライトして「1…2…3!」と数え上げて祝福する。
 
@@ -6,7 +6,7 @@
 
 ## 公開URL
 
-**▶ https://kerokero-1245.github.io/sansu-app/**
+**▶ https://kerokero-1245.github.io/piyopiyo-sansu/**
 
 ブラウザで開いてそのまま遊べる。スマホなら「ホーム画面に追加」で全画面起動。`main` に push すると GitHub Actions（[.github/workflows/deploy.yml](.github/workflows/deploy.yml)）が Web を書き出して自動デプロイする。
 
@@ -53,10 +53,10 @@ npm start            # Expo を起動 → ターミナルで w を押すと Web 
 npx expo export --platform web      # dist/ に静的ファイルを書き出す（ルート配信用）
 ```
 
-GitHub Pages はサブパス（`/sansu-app/`）配信のため、CI では `EXPO_BASE_URL=/sansu-app` を渡して書き出す。この環境変数を [app.config.js](app.config.js) が `experiments.baseUrl` に反映し、**ビルド時のみ**アセットのベースパスを付ける（ローカルの `npm start` には影響しない）。手元で再現するなら:
+GitHub Pages はサブパス（`/piyopiyo-sansu/`）配信のため、CI では `EXPO_BASE_URL=/piyopiyo-sansu` を渡して書き出す。この環境変数を [app.config.js](app.config.js) が `experiments.baseUrl` に反映し、**ビルド時のみ**アセットのベースパスを付ける（ローカルの `npm start` には影響しない）。手元で再現するなら:
 
 ```sh
-EXPO_BASE_URL=/sansu-app npx expo export --platform web
+EXPO_BASE_URL=/piyopiyo-sansu npx expo export --platform web
 ```
 
 ### 遊び方（フェーズ1）
