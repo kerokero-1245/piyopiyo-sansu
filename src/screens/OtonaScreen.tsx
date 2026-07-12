@@ -5,7 +5,7 @@ import React, { useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { colors, font, radius, space } from '../theme';
 import BigButton from '../components/BigButton';
-import { getMaxSum, MaxSum, setMaxSum } from '../settings';
+import { getMaxSum, getTotalStars, MaxSum, resetStars, setMaxSum } from '../settings';
 import { playSound } from '../audio/sounds';
 
 interface Props {
@@ -14,11 +14,24 @@ interface Props {
 
 export default function OtonaScreen({ onBack }: Props) {
   const [maxSum, setMax] = useState<MaxSum>(getMaxSum());
+  const [stars, setStars] = useState<number>(getTotalStars());
+  const [confirmReset, setConfirmReset] = useState(false); // 誤操作防止の2段階確認
 
   const choose = (v: MaxSum) => {
     playSound('tap');
     setMaxSum(v);
     setMax(v);
+  };
+
+  const onResetPress = () => {
+    playSound('tap');
+    if (!confirmReset) {
+      setConfirmReset(true); // 1回目は確認へ
+      return;
+    }
+    resetStars();
+    setStars(0);
+    setConfirmReset(false);
   };
 
   const Option = ({ v, label }: { v: MaxSum; label: string }) => {
@@ -51,6 +64,43 @@ export default function OtonaScreen({ onBack }: Props) {
         </Text>
       </View>
 
+      {/* あつめた ほし（累計スタンプ）。数字スコアではなく“集めた⭐の数”。リセットはここだけ。 */}
+      <View style={[styles.card, styles.cardGap]}>
+        <Text style={styles.label}>あつめた ほし</Text>
+        <Text style={styles.starTotal}>⭐ × {stars}</Text>
+        <View style={styles.resetRow}>
+          {confirmReset ? (
+            <Pressable
+              onPress={() => {
+                playSound('tap');
+                setConfirmReset(false);
+              }}
+              accessibilityRole="button"
+              style={[styles.resetBtn, styles.resetCancel]}
+            >
+              <Text style={styles.resetCancelText}>やめる</Text>
+            </Pressable>
+          ) : null}
+          <Pressable
+            onPress={onResetPress}
+            accessibilityRole="button"
+            disabled={stars === 0 && !confirmReset}
+            style={[
+              styles.resetBtn,
+              confirmReset ? styles.resetConfirm : styles.resetIdle,
+              stars === 0 && !confirmReset ? styles.resetDisabled : null,
+            ]}
+          >
+            <Text style={confirmReset ? styles.resetConfirmText : styles.resetIdleText}>
+              {confirmReset ? 'ほんとうに 0に する' : '0に もどす'}
+            </Text>
+          </Pressable>
+        </View>
+        <Text style={styles.note}>
+          あつめた ほし は へりません。ここでだけ 0に もどせます。
+        </Text>
+      </View>
+
       <View style={styles.spacer} />
 
       <BigButton emoji="◀️" label="もどる" onPress={onBack} color={colors.button} />
@@ -75,6 +125,9 @@ const styles = StyleSheet.create({
     padding: space.lg,
     borderWidth: 1,
     borderColor: colors.stageBorder,
+  },
+  cardGap: {
+    marginTop: space.md,
   },
   label: {
     fontSize: font.body,
@@ -122,6 +175,54 @@ const styles = StyleSheet.create({
     color: colors.subtext,
     marginTop: space.md,
     lineHeight: 24,
+  },
+  starTotal: {
+    fontSize: font.huge,
+    fontWeight: '900',
+    color: colors.text,
+  },
+  resetRow: {
+    flexDirection: 'row',
+    columnGap: space.sm,
+    marginTop: space.md,
+  },
+  resetBtn: {
+    minHeight: 52,
+    borderRadius: radius.md,
+    paddingHorizontal: space.md,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 2,
+  },
+  resetIdle: {
+    backgroundColor: colors.surface,
+    borderColor: colors.stageBorder,
+  },
+  resetIdleText: {
+    fontSize: font.body,
+    fontWeight: '800',
+    color: colors.subtext,
+  },
+  resetConfirm: {
+    backgroundColor: colors.button,
+    borderColor: colors.buttonPressed,
+  },
+  resetConfirmText: {
+    fontSize: font.body,
+    fontWeight: '900',
+    color: colors.white,
+  },
+  resetCancel: {
+    backgroundColor: colors.surface,
+    borderColor: colors.stageBorder,
+  },
+  resetCancelText: {
+    fontSize: font.body,
+    fontWeight: '800',
+    color: colors.text,
+  },
+  resetDisabled: {
+    opacity: 0.4,
   },
   spacer: {
     flex: 1,
