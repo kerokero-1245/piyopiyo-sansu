@@ -1,8 +1,10 @@
-// おとなモード（親ゲートの奥）。かずの おおきさ（合計5まで / 10まで）を切り替える。
-// 変更は次のもんだいから反映される（PlayScreen がマウント時に設定を読む / DESIGN §7）。
+// おとなモード（親ゲートの奥）。かずの おおきさ（合計5まで / 10まで）の切替と、
+// あつめた ほし（累計⭐）の表示・リセット（DESIGN §7・§14）。
+// 変更は次のもんだいから反映される（PlayScreen がマウント時に設定を読む）。
+// 項目が増えても背の低い画面で「もどる」が隠れないよう、内容は ScrollView に入れる（DESIGN §8）。
 
 import React, { useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { colors, font, radius, space } from '../theme';
 import BigButton from '../components/BigButton';
 import { getMaxSum, getTotalStars, MaxSum, resetStars, setMaxSum } from '../settings';
@@ -51,10 +53,15 @@ export default function OtonaScreen({ onBack }: Props) {
 
   return (
     <View style={styles.root}>
-      <Text style={styles.title}>おとなモード</Text>
+      <ScrollView
+        style={styles.scroll}
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
+        <Text style={styles.title}>おとなモード</Text>
 
-      <View style={styles.card}>
-        <Text style={styles.label}>かずの おおきさ</Text>
+        <View style={styles.card}>
+          <Text style={styles.label}>かずの おおきさ</Text>
         <View style={styles.options}>
           <Option v={5} label="5まで" />
           <Option v={10} label="10まで" />
@@ -99,11 +106,13 @@ export default function OtonaScreen({ onBack }: Props) {
         <Text style={styles.note}>
           あつめた ほし は へりません。ここでだけ 0に もどせます。
         </Text>
+        </View>
+      </ScrollView>
+
+      {/* 「もどる」はスクロールの外に固定し、背の低い画面でも常に押せるようにする（DESIGN §8）。 */}
+      <View style={styles.backWrap}>
+        <BigButton emoji="◀️" label="もどる" onPress={onBack} color={colors.button} />
       </View>
-
-      <View style={styles.spacer} />
-
-      <BigButton emoji="◀️" label="もどる" onPress={onBack} color={colors.button} />
     </View>
   );
 }
@@ -111,7 +120,16 @@ export default function OtonaScreen({ onBack }: Props) {
 const styles = StyleSheet.create({
   root: {
     flex: 1,
+  },
+  scroll: {
+    flex: 1,
+  },
+  scrollContent: {
     paddingTop: space.lg,
+    paddingBottom: space.md,
+  },
+  backWrap: {
+    marginTop: space.md,
   },
   title: {
     fontSize: font.title,
@@ -223,8 +241,5 @@ const styles = StyleSheet.create({
   },
   resetDisabled: {
     opacity: 0.4,
-  },
-  spacer: {
-    flex: 1,
   },
 });
