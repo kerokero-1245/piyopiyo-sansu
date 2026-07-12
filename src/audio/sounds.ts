@@ -13,7 +13,8 @@ export type SoundName =
   | 'appear' // モノが1つ ふえる（歩いてくる）
   | 'eat' // モノが1つ 食べられて消える
   | 'wrong' // まちがい（罰ではないやさしい合図）
-  | 'clear'; // 正解・セット完了 ファンファーレ
+  | 'star' // ⭐スタンプ獲得（1問クリア）ぽん・きらっ
+  | 'clear'; // セット完了 ファンファーレ
 
 interface Note {
   freq: number;
@@ -35,6 +36,10 @@ const TONES: Record<SoundName, Note[]> = {
   wrong: [
     { freq: 392, dur: 0.12, type: 'sine' },
     { freq: 330, dur: 0.16, type: 'sine' }, // ゆるく下降（責めない）
+  ],
+  star: [
+    { freq: 784, dur: 0.07, type: 'triangle' }, // ぽん
+    { freq: 1319, dur: 0.16, type: 'sine' }, // きらっ（高いミ）
   ],
   clear: [
     { freq: 523, dur: 0.12, type: 'sine' }, // ド

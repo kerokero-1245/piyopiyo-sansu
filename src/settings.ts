@@ -1,11 +1,14 @@
-// かずの おおきさ（maxSum）の保存。DESIGN §7。
+// 端末内の保存もの（DESIGN §7・§14）。
+// - かずの おおきさ（maxSum）
+// - あつめた ほし の累計（totalStars）… ごほうび（スタンプ）のコレクション
 // web は localStorage に保存、native はセッション内キャッシュのみ（MVP）。外部送信なし。
-// 取得失敗時は既定 5 にフォールバック。消えても遊びは壊れない。
+// 取得失敗時は既定値にフォールバック。消えても遊びは壊れない（罰・失敗表示はしない）。
 
 import { Platform } from 'react-native';
 
 export type MaxSum = 5 | 10;
 const KEY = 'sansu.maxSum';
+const STAR_KEY = 'sansu.totalStars';
 const DEFAULT: MaxSum = 5;
 
 // 型の都合で最小限だけ宣言（DOM lib に依存しない）。
@@ -49,6 +52,56 @@ export function setMaxSum(v: MaxSum): void {
       store.setItem(KEY, String(v));
     } catch {
       // 保存できなくても遊びは壊さない
+    }
+  }
+}
+
+// ── あつめた ほし（累計スタンプ）───────────────────────────────
+// 1問クリアごとに +1 する“ごほうび”の合計。減ることはない（マイナス要素ゼロ）。
+// リセットはおとなモードからのみ。数字スコアではなく「集めた⭐の数」を貯める。
+let starCache: number | null = null;
+
+export function getTotalStars(): number {
+  if (starCache !== null) return starCache;
+  const store = ls();
+  if (store) {
+    try {
+      const v = store.getItem(STAR_KEY);
+      if (v != null) {
+        const n = parseInt(v, 10);
+        if (Number.isFinite(n) && n >= 0) return (starCache = n);
+      }
+    } catch {
+      // 無視して既定（0）へ
+    }
+  }
+  return (starCache = 0);
+}
+
+// n 個の⭐を加える（既定1）。新しい累計を返す。
+export function addStars(n = 1): number {
+  const next = getTotalStars() + Math.max(0, n);
+  starCache = next;
+  const store = ls();
+  if (store) {
+    try {
+      store.setItem(STAR_KEY, String(next));
+    } catch {
+      // 保存できなくても遊びは壊さない（セッション内キャッシュは保持）
+    }
+  }
+  return next;
+}
+
+// 累計を0に戻す（おとなモード専用）。
+export function resetStars(): void {
+  starCache = 0;
+  const store = ls();
+  if (store) {
+    try {
+      store.setItem(STAR_KEY, '0');
+    } catch {
+      // 無視
     }
   }
 }
