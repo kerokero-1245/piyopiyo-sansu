@@ -10,13 +10,14 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { LayoutChangeEvent, Pressable, StyleSheet, Text, View } from 'react-native';
 import { colors, font, radius, space } from '../theme';
 import { generateSet } from '../game/problems';
-import { getMaxSum } from '../settings';
+import { addStars, getMaxSum } from '../settings';
 import { playSound } from '../audio/sounds';
 import { Problem } from '../types';
 import ThingsStage, { ThingsStageHandle } from '../components/ThingsStage';
 import ChoiceButton from '../components/ChoiceButton';
 import ClearOverlay from '../components/ClearOverlay';
 import Confetti from '../components/Confetti';
+import ProgressStar from '../components/ProgressStar';
 
 interface Props {
   onHome: () => void;
@@ -50,6 +51,8 @@ export default function PlayScreen({ onHome }: Props) {
   );
   const [index, setIndex] = useState(0);
   const [gameId, setGameId] = useState(0);
+  // このセットで集めた⭐スタンプの数（=クリアした問題数）。進捗ドットが左から⭐に変わる。
+  const [starsEarned, setStarsEarned] = useState(0);
 
   const [measured, setMeasured] = useState({ w: 0, h: 0 });
   const [ready, setReady] = useState(false); // 増減アニメ後に回答可能
@@ -102,6 +105,7 @@ export default function PlayScreen({ onHome }: Props) {
     setProblems(generateSet(maxSumRef.current, SET_SIZE));
     setIndex(0);
     setGameId((g) => g + 1);
+    setStarsEarned(0);
     setReady(false);
     setLocked(false);
     setCelebrating(false);
@@ -114,11 +118,15 @@ export default function PlayScreen({ onHome }: Props) {
       if (!ready || locked || done) return;
       playSound('tap');
       if (value === problem.answer) {
-        // 正解: 数え上げ → 紙吹雪 → 次へ。
+        // 正解: 数え上げ → ⭐スタンプ獲得（進捗ドットが⭐に変わる）→ ちいさな紙吹雪 → 次へ。
+        // 再挑戦してからのクリアでも同じ⭐（獲得に条件差はつけない・DESIGN §14）。
         setReady(false);
         setLocked(true);
         stageRef.current?.countUp(() => {
-          playSound('clear');
+          // ⭐を1つ獲得。累計にも加算し、進捗ドットを⭐へ（ぽんっと出る）。
+          addStars(1);
+          setStarsEarned((s) => s + 1);
+          playSound('star');
           setCelebrating(true);
           later(() => {
             setCelebrating(false);
@@ -151,15 +159,10 @@ export default function PlayScreen({ onHome }: Props) {
         <Pressable onPress={onHome} hitSlop={10} style={styles.homeBtn} accessibilityLabel="おうちへ">
           <Text style={styles.homeGlyph}>🏠</Text>
         </Pressable>
-        <View style={styles.progress}>
+        <View style={styles.progress} testID="progress">
           {problems.map((_, i) => (
-            <View
-              key={i}
-              style={[
-                styles.dot,
-                i < index ? styles.dotOn : i === index ? styles.dotNow : styles.dotOff,
-              ]}
-            />
+            // クリア済み=⭐ / いまの問題=オレンジ丸 / これから=グレー丸
+            <ProgressStar key={i} state={i < starsEarned ? 'star' : i === index ? 'now' : 'off'} />
           ))}
         </View>
         <View style={styles.homeBtn} />
@@ -202,7 +205,7 @@ export default function PlayScreen({ onHome }: Props) {
       </View>
 
       {celebrating ? <Confetti /> : null}
-      {done ? <ClearOverlay onReplay={newGame} onHome={onHome} /> : null}
+      {done ? <ClearOverlay starCount={SET_SIZE} onReplay={newGame} onHome={onHome} /> : null}
     </View>
   );
 }
@@ -230,21 +233,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     columnGap: space.sm,
     alignItems: 'center',
-  },
-  dot: {
-    width: 16,
-    height: 16,
-    borderRadius: 8,
-  },
-  dotOn: {
-    backgroundColor: colors.progressOn,
-  },
-  dotNow: {
-    backgroundColor: colors.progressNow,
-    transform: [{ scale: 1.25 }],
-  },
-  dotOff: {
-    backgroundColor: colors.progressOff,
   },
   stage: {
     flex: 1,

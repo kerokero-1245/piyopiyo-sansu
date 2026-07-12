@@ -1,21 +1,69 @@
-// 1セット（5問）ぜんぶ終わったときの祝福オーバーレイ。紙吹雪＋「ぜんぶ できたね!」＋
-// 「もういちど」（新しい5問）/「おうちへ」。罰やスコアは出さない（DESIGN §4）。
+// 1セット（5問）ぜんぶ終わったときの「きょうの がんばりカード」（DESIGN §14）。
+// できたね!画面を進化させ、集めた⭐を1つずつ順に出す（数え上げのトーン）→ 5つ揃って祝福。
+// その下に「あつめた ほし ⭐×N」（累計）を控えめに表示。スコアも罰も出さない（DESIGN §4）。
+//
+// ⭐の累計は PlayScreen が1問クリアごとに settings へ加算済み。ここでは読むだけ。
 
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Animated, Easing, StyleSheet, Text, View } from 'react-native';
 import { colors, font, space } from '../theme';
 import BigButton from './BigButton';
 import Confetti from './Confetti';
+import { getTotalStars } from '../settings';
+import { playCountTone, playSound } from '../audio/sounds';
 
 interface Props {
+  starCount: number; // このセットで集めた⭐の数（=5）
   onReplay: () => void;
   onHome: () => void;
 }
 
-export default function ClearOverlay({ onReplay, onHome }: Props) {
+// カード上の⭐スロット1つ。まだ出ていないときは薄い☆、出た瞬間に⭐が「ぽんっ」と現れる。
+function CardStar({ filled }: { filled: boolean }) {
+  const pop = useRef(new Animated.Value(filled ? 1 : 0)).current;
+  const prev = useRef(filled);
+  useEffect(() => {
+    if (filled && !prev.current) {
+      pop.setValue(0);
+      Animated.spring(pop, { toValue: 1, friction: 4, tension: 130, useNativeDriver: false }).start();
+    }
+    prev.current = filled;
+  }, [filled, pop]);
+
+  if (!filled) {
+    return (
+      <View style={styles.starSlot}>
+        <Text style={styles.starEmpty}>☆</Text>
+      </View>
+    );
+  }
+  const scale = pop.interpolate({ inputRange: [0, 1], outputRange: [0.2, 1] });
+  const opacity = pop.interpolate({ inputRange: [0, 0.4, 1], outputRange: [0, 1, 1] });
+  return (
+    <View style={styles.starSlot}>
+      <Animated.Text style={[styles.starFull, { opacity, transform: [{ scale }] }]}>⭐</Animated.Text>
+    </View>
+  );
+}
+
+export default function ClearOverlay({ starCount, onReplay, onHome }: Props) {
+  // 累計は既に加算済み。マウント時に一度だけ読む。
+  const total = useRef(getTotalStars()).current;
+
+  const [shown, setShown] = useState(0); // いくつ⭐が現れたか（0..starCount）
+  const [gathered, setGathered] = useState(false); // 5つ揃った（祝福）
+
   const scale = useRef(new Animated.Value(0.3)).current;
   const opacity = useRef(new Animated.Value(0)).current;
+  const timers = useRef<ReturnType<typeof setTimeout>[]>([]);
+
   useEffect(() => {
+    const later = (fn: () => void, ms: number) => {
+      const id = setTimeout(fn, ms);
+      timers.current.push(id);
+    };
+
+    // カードがふわっと出る。
     Animated.parallel([
       Animated.spring(scale, { toValue: 1, friction: 5, tension: 90, useNativeDriver: false }),
       Animated.timing(opacity, {
@@ -25,18 +73,47 @@ export default function ClearOverlay({ onReplay, onHome }: Props) {
         useNativeDriver: false,
       }),
     ]).start();
-  }, [scale, opacity]);
+
+    // ⭐を1つずつ順に出す（数え上げと同じトーンで音程を上げていく）→ 揃ったら祝福。
+    const startDelay = 480;
+    const stepMs = 460;
+    for (let i = 0; i < starCount; i++) {
+      later(() => {
+        setShown(i + 1);
+        playCountTone(i);
+      }, startDelay + i * stepMs);
+    }
+    later(() => {
+      setGathered(true);
+      playSound('clear'); // 5つ揃ってファンファーレ＋紙吹雪
+    }, startDelay + starCount * stepMs + 140);
+
+    return () => timers.current.forEach(clearTimeout);
+    // マウント時のみ（done で1回だけ表示される）。
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <View style={styles.root} pointerEvents="box-none">
       <View style={styles.backdrop} pointerEvents="none" />
-      <Confetti />
+      {gathered ? <Confetti /> : null}
 
       <Animated.View style={[styles.card, { opacity, transform: [{ scale }] }]}>
-        <View style={styles.circle}>
-          <Text style={styles.emoji}>🎉</Text>
+        <Text style={styles.title}>きょうの がんばりカード</Text>
+
+        <View style={styles.stars}>
+          {Array.from({ length: starCount }, (_, i) => (
+            <CardStar key={i} filled={i < shown} />
+          ))}
         </View>
-        <Text style={styles.headline}>ぜんぶ できたね!</Text>
+
+        {/* 5つ揃ったら「できたね!」。揃うまでは高さを確保して見た目が跳ねないようにする。 */}
+        <View style={styles.doneSlot}>
+          {gathered ? <Text style={styles.doneText}>ぜんぶ できたね!</Text> : null}
+        </View>
+
+        {/* 累計コレクション（控えめ・数字スコアではなく“集めた⭐の数”） */}
+        <Text style={styles.total}>あつめた ほし ⭐ × {total}</Text>
       </Animated.View>
 
       <View style={styles.buttons}>
@@ -62,7 +139,7 @@ const styles = StyleSheet.create({
     bottom: 0,
     alignItems: 'center',
     justifyContent: 'center',
-    padding: space.lg,
+    padding: space.md,
   },
   backdrop: {
     position: 'absolute',
@@ -74,35 +151,68 @@ const styles = StyleSheet.create({
   },
   card: {
     alignItems: 'center',
-    marginBottom: space.xl,
-  },
-  circle: {
-    width: 180,
-    height: 180,
-    borderRadius: 90,
-    backgroundColor: colors.countHalo,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 6,
+    backgroundColor: colors.surface,
+    borderRadius: 28,
+    paddingVertical: space.md,
+    paddingHorizontal: space.md,
+    marginBottom: space.lg,
+    maxWidth: 380,
+    width: '100%',
+    borderWidth: 4,
     borderColor: colors.white,
     shadowColor: '#00000066',
     shadowOffset: { width: 0, height: 6 },
     shadowOpacity: 0.35,
-    shadowRadius: 12,
+    shadowRadius: 14,
     elevation: 8,
   },
-  emoji: {
-    fontSize: 104,
-    lineHeight: 120,
-  },
-  headline: {
-    marginTop: space.md,
-    fontSize: font.huge,
+  title: {
+    fontSize: 22,
     fontWeight: '900',
-    color: colors.white,
-    textShadowColor: '#00000088',
-    textShadowOffset: { width: 0, height: 2 },
-    textShadowRadius: 6,
+    color: colors.text,
+    marginBottom: space.sm,
+    textAlign: 'center',
+  },
+  stars: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'center',
+    columnGap: space.xs,
+    rowGap: space.xs,
+  },
+  starSlot: {
+    width: 44,
+    height: 50,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  starFull: {
+    fontSize: 38,
+    lineHeight: 44,
+    textAlign: 'center',
+  },
+  starEmpty: {
+    fontSize: 38,
+    lineHeight: 44,
+    textAlign: 'center',
+    color: colors.progressOff,
+  },
+  doneSlot: {
+    minHeight: 40,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: space.xs,
+  },
+  doneText: {
+    fontSize: 28,
+    fontWeight: '900',
+    color: colors.button,
+  },
+  total: {
+    fontSize: font.small,
+    fontWeight: '700',
+    color: colors.subtext,
+    marginTop: space.sm,
   },
   buttons: {
     width: '100%',
