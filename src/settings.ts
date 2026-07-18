@@ -9,6 +9,7 @@ import { Platform } from 'react-native';
 export type MaxSum = 5 | 10;
 const KEY = 'sansu.maxSum';
 const STAR_KEY = 'sansu.totalStars';
+const TTS_KEY = 'sansu.tts';
 const DEFAULT: MaxSum = 5;
 
 // 型の都合で最小限だけ宣言（DOM lib に依存しない）。
@@ -100,6 +101,38 @@ export function resetStars(): void {
   if (store) {
     try {
       store.setItem(STAR_KEY, '0');
+    } catch {
+      // 無視
+    }
+  }
+}
+
+// ── よみあげ（読み上げ／TTS）オン/オフ ───────────────────────────────
+// 正解「せいかい！」・誤答「おしい／あれれ」・タイトル・がんばりカードの読み上げ（DESIGN §4）。
+// 既定は オン。壊れた値は既定へ。音が使えない・うるさい環境では おとなモードで オフにできる。
+let ttsCache: boolean | null = null;
+
+export function getTtsOn(): boolean {
+  if (ttsCache !== null) return ttsCache;
+  const store = ls();
+  if (store) {
+    try {
+      const v = store.getItem(TTS_KEY);
+      if (v === 'off') return (ttsCache = false);
+      if (v === 'on') return (ttsCache = true);
+    } catch {
+      // 無視して既定へ
+    }
+  }
+  return (ttsCache = true);
+}
+
+export function setTtsOn(on: boolean): void {
+  ttsCache = on;
+  const store = ls();
+  if (store) {
+    try {
+      store.setItem(TTS_KEY, on ? 'on' : 'off');
     } catch {
       // 無視
     }

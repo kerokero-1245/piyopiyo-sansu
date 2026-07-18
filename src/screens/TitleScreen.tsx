@@ -6,6 +6,8 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { colors, font, space } from '../theme';
 import BigButton from '../components/BigButton';
 import { playSound } from '../audio/sounds';
+import { sayPhrase, warmUpVoice } from '../audio/voice';
+import { getTtsOn } from '../settings';
 
 interface Props {
   onPlay: () => void;
@@ -31,10 +33,26 @@ export default function TitleScreen({ onPlay, onOtona }: Props) {
     }, HOLD_MS);
   };
 
+  // タイトルをタップすると「ぴよぴよさんすう」を読み上げる（ジェスチャ起点＝自動再生制限を守る）。
+  // 最初のタップでもあるので warmUpVoice() で読み上げをアンロックしてから読む。読み上げオフなら黙る。
+  const sayTitle = () => {
+    playSound('tap');
+    warmUpVoice();
+    sayPhrase('title', { enabled: getTtsOn() });
+  };
+
   return (
     <View style={styles.root}>
       <View style={styles.center}>
-        <Text style={styles.title}>ぴよぴよさんすう</Text>
+        <Pressable
+          onPress={sayTitle}
+          accessibilityRole="button"
+          accessibilityLabel="ぴよぴよさんすう（きく）"
+          hitSlop={12}
+          testID="title-say"
+        >
+          <Text style={styles.title}>ぴよぴよさんすう</Text>
+        </Pressable>
         <Text style={styles.subtitle}>かぞえて あそぼう</Text>
 
         {/* 概念の絵: ふえる（🐥→🐥🐥🐥）/ へる（🍎🍎🍎→🍎） */}
@@ -58,6 +76,7 @@ export default function TitleScreen({ onPlay, onOtona }: Props) {
             pressedColor={colors.playPressed}
             onPress={() => {
               playSound('tap');
+              warmUpVoice(); // 最初のタップで読み上げ（クリップ＋TTS）をアンロック
               onPlay();
             }}
           />

@@ -10,8 +10,9 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { LayoutChangeEvent, Pressable, StyleSheet, Text, View } from 'react-native';
 import { colors, font, radius, space } from '../theme';
 import { generateSet } from '../game/problems';
-import { addStars, getMaxSum } from '../settings';
+import { addStars, getMaxSum, getTtsOn } from '../settings';
 import { playSound } from '../audio/sounds';
+import { cancelVoice, sayPhrase, sayWrongCheer } from '../audio/voice';
 import { Problem } from '../types';
 import ThingsStage, { ThingsStageHandle } from '../components/ThingsStage';
 import ChoiceButton from '../components/ChoiceButton';
@@ -26,6 +27,8 @@ interface Props {
 const SET_SIZE = 5;
 const GAP = 12;
 const BADGE_RESERVE = 72; // ステージ内の数え上げバッジ帯のぶん
+// 正解時「せいかい！」を先に鳴らし、その少しあとに数え上げ演出を始める（順序厳守）。
+const SEIKAI_LEAD_MS = 600;
 
 // モノの並び方（1行あたりの数と行数）。5以下は1行、6以上は2行に均等割り。
 function gridPlan(renderCount: number): { cols: number; rows: number } {
@@ -46,6 +49,8 @@ function computeThingSize(w: number, h: number, renderCount: number): number {
 
 export default function PlayScreen({ onHome }: Props) {
   const maxSumRef = useRef<number>(getMaxSum());
+  // 読み上げ設定はマウント時に固定（このセットの途中では変わらない）。
+  const ttsRef = useRef<boolean>(getTtsOn());
   const [problems, setProblems] = useState<Problem[]>(() =>
     generateSet(maxSumRef.current, SET_SIZE)
   );
@@ -71,6 +76,7 @@ export default function PlayScreen({ onHome }: Props) {
   useEffect(
     () => () => {
       timers.current.forEach(clearTimeout);
+      cancelVoice(); // 画面を離れるときは読み上げも止める
     },
     []
   );
@@ -118,26 +124,36 @@ export default function PlayScreen({ onHome }: Props) {
       if (!ready || locked || done) return;
       playSound('tap');
       if (value === problem.answer) {
-        // 正解: 数え上げ → ⭐スタンプ獲得（進捗ドットが⭐に変わる）→ ちいさな紙吹雪 → 次へ。
+        // 正解: 「せいかい！」→ その後に 数え上げ → ⭐スタンプ獲得 → ちいさな紙吹雪 → 次へ（順序厳守）。
         // 再挑戦してからのクリアでも同じ⭐（獲得に条件差はつけない・DESIGN §14）。
         setReady(false);
         setLocked(true);
-        stageRef.current?.countUp(() => {
-          // ⭐を1つ獲得。累計にも加算し、進捗ドットを⭐へ（ぽんっと出る）。
-          addStars(1);
-          setStarsEarned((s) => s + 1);
-          playSound('star');
-          setCelebrating(true);
-          later(() => {
-            setCelebrating(false);
-            goNext();
-          }, 1100);
-        }, false);
+        // 既存の数え上げ演出。ここは変えない（「せいかい！」の後に呼ぶ）。
+        const startCountUp = () =>
+          stageRef.current?.countUp(() => {
+            // ⭐を1つ獲得。累計にも加算し、進捗ドットを⭐へ（ぽんっと出る）。
+            addStars(1);
+            setStarsEarned((s) => s + 1);
+            playSound('star');
+            setCelebrating(true);
+            later(() => {
+              setCelebrating(false);
+              goNext();
+            }, 1100);
+          }, false);
+        if (ttsRef.current) {
+          // まず「せいかい！」（tier1 クリップ → tier2 TTS）。少し先行させてから数え上げへ。
+          sayPhrase('seikai', { enabled: true });
+          later(startCountUp, SEIKAI_LEAD_MS);
+        } else {
+          startCountUp(); // 読み上げオフ: これまで通り即・数え上げ
+        }
       } else {
-        // 不正解: ぷるぷる → ゆっくり数え上げ（正しい数え方を見せる）→ もう一度。罰なし。
+        // 不正解: ぷるぷる（wiggle）と「おしい／あれれ」を同時に → ゆっくり数え上げ → もう一度。罰なし。
         setWrongValue(value);
         setWrongNonce((n) => n + 1);
         playSound('wrong');
+        if (ttsRef.current) sayWrongCheer({ enabled: true }); // 既存の wiggle 演出と共存
         setReady(false);
         setLocked(true);
         stageRef.current?.countUp(() => {

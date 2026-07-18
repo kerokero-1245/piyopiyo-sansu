@@ -5,12 +5,16 @@
 // ⭐の累計は PlayScreen が1問クリアごとに settings へ加算済み。ここでは読むだけ。
 
 import React, { useEffect, useRef, useState } from 'react';
-import { Animated, Easing, StyleSheet, Text, View } from 'react-native';
+import { Animated, Easing, Image, StyleSheet, Text, View } from 'react-native';
 import { colors, font, space } from '../theme';
 import BigButton from './BigButton';
 import Confetti from './Confetti';
-import { getTotalStars } from '../settings';
+import { getTotalStars, getTtsOn } from '../settings';
 import { playCountTone, playSound } from '../audio/sounds';
+import { sayPhrase } from '../audio/voice';
+
+// ⭐ はシールポップ画風の素材（ほし）に差し替え。まだ集めていないスロットは薄く表示する。
+const HOSHI = require('../../assets/svg/hoshi.svg');
 
 interface Props {
   starCount: number; // このセットで集めた⭐の数（=5）
@@ -33,7 +37,7 @@ function CardStar({ filled }: { filled: boolean }) {
   if (!filled) {
     return (
       <View style={styles.starSlot}>
-        <Text style={styles.starEmpty}>☆</Text>
+        <Image source={HOSHI} resizeMode="contain" style={styles.starEmpty} />
       </View>
     );
   }
@@ -41,7 +45,11 @@ function CardStar({ filled }: { filled: boolean }) {
   const opacity = pop.interpolate({ inputRange: [0, 0.4, 1], outputRange: [0, 1, 1] });
   return (
     <View style={styles.starSlot}>
-      <Animated.Text style={[styles.starFull, { opacity, transform: [{ scale }] }]}>⭐</Animated.Text>
+      <Animated.Image
+        source={HOSHI}
+        resizeMode="contain"
+        style={[styles.starFull, { opacity, transform: [{ scale }] }]}
+      />
     </View>
   );
 }
@@ -86,6 +94,7 @@ export default function ClearOverlay({ starCount, onReplay, onHome }: Props) {
     later(() => {
       setGathered(true);
       playSound('clear'); // 5つ揃ってファンファーレ＋紙吹雪
+      sayPhrase('dekita', { enabled: getTtsOn() }); // 「ぜんぶ できたね！」（読み上げオフなら黙る）
     }, startDelay + starCount * stepMs + 140);
 
     return () => timers.current.forEach(clearTimeout);
@@ -113,7 +122,11 @@ export default function ClearOverlay({ starCount, onReplay, onHome }: Props) {
         </View>
 
         {/* 累計コレクション（控えめ・数字スコアではなく“集めた⭐の数”） */}
-        <Text style={styles.total}>あつめた ほし ⭐ × {total}</Text>
+        <View style={styles.totalRow}>
+          <Text style={styles.total}>あつめた ほし </Text>
+          <Image source={HOSHI} resizeMode="contain" style={styles.totalStar} />
+          <Text style={styles.total}> × {total}</Text>
+        </View>
       </Animated.View>
 
       <View style={styles.buttons}>
@@ -187,15 +200,13 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   starFull: {
-    fontSize: 38,
-    lineHeight: 44,
-    textAlign: 'center',
+    width: 42,
+    height: 42,
   },
   starEmpty: {
-    fontSize: 38,
-    lineHeight: 44,
-    textAlign: 'center',
-    color: colors.progressOff,
+    width: 42,
+    height: 42,
+    opacity: 0.28,
   },
   doneSlot: {
     minHeight: 40,
@@ -208,11 +219,19 @@ const styles = StyleSheet.create({
     fontWeight: '900',
     color: colors.button,
   },
+  totalRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: space.sm,
+  },
   total: {
     fontSize: font.small,
     fontWeight: '700',
     color: colors.subtext,
-    marginTop: space.sm,
+  },
+  totalStar: {
+    width: 18,
+    height: 18,
   },
   buttons: {
     width: '100%',
