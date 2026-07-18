@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" role="img" aria-label="いぬ">
+  <!-- white die-cut underlay -->
+  <g fill="#ffffff" stroke="#ffffff" stroke-width="15" stroke-linejoin="round" stroke-linecap="round">
+    <path d="M72,62 Q40,66 40,116 Q42,138 64,132 Q68,102 82,74 Z"/>
+    <path d="M128,62 Q160,66 160,116 Q158,138 136,132 Q132,102 118,74 Z"/>
+    <circle cx="100" cy="96" r="50"/>
+  </g>
+  <!-- floppy ears (behind head) -->
+  <path d="M72,62 Q40,66 40,116 Q42,138 64,132 Q68,102 82,74 Z" fill="#B5773C" stroke="#3d2a1c" stroke-width="3.2" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M128,62 Q160,66 160,116 Q158,138 136,132 Q132,102 118,74 Z" fill="#B5773C" stroke="#3d2a1c" stroke-width="3.2" stroke-linejoin="round" stroke-linecap="round"/>
+  <!-- head -->
+  <circle cx="100" cy="96" r="50" fill="#E0A85C" stroke="#3d2a1c" stroke-width="3.2"/>
+  <!-- muzzle -->
+  <ellipse cx="100" cy="110" rx="30" ry="23" fill="#FFF0D6" stroke="#3d2a1c" stroke-width="3"/>
+  <!-- cheeks -->
+  <ellipse cx="68" cy="103" rx="9" ry="6" fill="#ff7ba0" opacity="0.72"/>
+  <ellipse cx="132" cy="103" rx="9" ry="6" fill="#ff7ba0" opacity="0.72"/>
+  <!-- eyes -->
+  <circle cx="82" cy="86" r="8.5" fill="#2a1e16"/>
+  <circle cx="118" cy="86" r="8.5" fill="#2a1e16"/>
+  <circle cx="85" cy="83" r="3" fill="#fff"/>
+  <circle cx="121" cy="83" r="3" fill="#fff"/>
+  <!-- nose -->
+  <path d="M89,101 Q100,96 111,101 Q113,111 100,115 Q87,111 89,101 Z" fill="#2a1c12"/>
+  <!-- mouth -->
+  <path d="M100,115 L100,121 M100,121 Q90,129 82,122 M100,121 Q110,129 118,122" fill="none" stroke="#3d2a1c" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- tongue -->
+  <path d="M94,123 Q100,133 106,123 Q100,127 94,123 Z" fill="#FF8FA3"/>
+</svg>

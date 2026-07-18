@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" role="img" aria-label="とり">
+  <!-- white die-cut underlay -->
+  <g fill="#ffffff" stroke="#ffffff" stroke-width="15" stroke-linejoin="round" stroke-linecap="round">
+    <path d="M52,104 L16,90 Q10,104 16,118 L54,124 Z"/>
+    <path fill="none" d="M84,150 L82,169 M82,169 L75,175 M82,169 L82,177 M82,169 L89,175"/>
+    <path fill="none" d="M110,150 L112,169 M112,169 L105,175 M112,169 L112,177 M112,169 L119,175"/>
+    <ellipse cx="90" cy="116" rx="46" ry="40"/>
+    <circle cx="126" cy="76" r="28"/>
+    <path d="M150,70 L181,80 L150,90 Z"/>
+  </g>
+  <!-- legs -->
+  <path fill="none" stroke="#F0891C" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"
+        d="M84,150 L82,169 M82,169 L75,175 M82,169 L82,177 M82,169 L89,175"/>
+  <path fill="none" stroke="#F0891C" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"
+        d="M110,150 L112,169 M112,169 L105,175 M112,169 L112,177 M112,169 L119,175"/>
+  <!-- tail -->
+  <path d="M52,104 L16,90 Q10,104 16,118 L54,124 Z" fill="#A6703C" stroke="#3d2a1c" stroke-width="3.2" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M30,98 L48,110 M28,110 L50,118" fill="none" stroke="#7A5230" stroke-width="2.2" stroke-linecap="round" opacity="0.7"/>
+  <!-- body + head -->
+  <ellipse cx="90" cy="116" rx="46" ry="40" fill="#6EC9EC" stroke="#3d2a1c" stroke-width="3.2"/>
+  <circle cx="126" cy="76" r="28" fill="#6EC9EC" stroke="#3d2a1c" stroke-width="3.2"/>
+  <!-- belly -->
+  <ellipse cx="98" cy="128" rx="30" ry="22" fill="#C7E9F7"/>
+  <!-- wing -->
+  <path d="M60,98 Q100,86 122,110 Q104,132 74,126 Q56,112 60,98 Z" fill="#B5773C" stroke="#3d2a1c" stroke-width="3" stroke-linejoin="round"/>
+  <path d="M74,104 Q94,102 110,114 M72,114 Q92,114 104,124" fill="none" stroke="#7A5230" stroke-width="2" stroke-linecap="round" opacity="0.75"/>
+  <!-- beak -->
+  <path d="M150,70 L181,80 L150,90 Z" fill="#FF9F1C" stroke="#3d2a1c" stroke-width="3.2" stroke-linejoin="round"/>
+  <path d="M150,80 L179,80" fill="none" stroke="#3d2a1c" stroke-width="1.8" stroke-linecap="round" opacity="0.55"/>
+  <!-- head highlight -->
+  <ellipse cx="116" cy="64" rx="11" ry="7" fill="#ffffff" opacity="0.24" transform="rotate(-18 116 64)"/>
+  <!-- cheek -->
+  <ellipse cx="136" cy="90" rx="8" ry="5.5" fill="#ff7ba0" opacity="0.72"/>
+  <!-- eye -->
+  <circle cx="128" cy="72" r="8.5" fill="#2a1e16"/>
+  <circle cx="131" cy="69" r="3" fill="#fff"/>
+</svg>

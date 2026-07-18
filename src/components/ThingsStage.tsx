@@ -12,6 +12,11 @@ import { colors, font } from '../theme';
 import { Problem } from '../types';
 import { playCountTone, playSound } from '../audio/sounds';
 
+// 素材SVG（viewBox 内に余白が焼き込まれている）を、絵文字と同等の存在感にするための描画倍率。
+// スロット（1辺=size）より少しだけ大きく中央に描く。gap(12) とステージ余白(20) の内側に収まる
+// 控えめな倍率なので、はみ出し・となり同士の被りは起きない。
+const OBJ_SCALE = 1.12;
+
 export interface ThingsStageHandle {
   // present なモノ（add: 総数 / sub: 残り）を 1..answer まで順に数え上げる。slow=不正解後のゆっくり提示。
   countUp: (onDone: () => void, slow: boolean) => void;
@@ -162,8 +167,12 @@ const ThingsStage = forwardRef<ThingsStageHandle, Props>(function ThingsStage(
           const translateY = isEaten
             ? e.interpolate({ inputRange: [0, 1], outputRange: [-size * 0.5, 0] })
             : 0;
+          // 素材SVGは viewBox 内に余白が焼き込まれているので、絵文字と同等の存在感にするため
+          // スロットより少しだけ大きく描く（中央寄せ）。gap(12) とステージ余白(20) の内側に収まる
+          // 倍率なので、はみ出し・被りは起きない。
+          const imgSize = size * OBJ_SCALE;
           return (
-            <View key={i} style={{ width: size, height: size }}>
+            <View key={i} style={[styles.slot, { width: size, height: size }]}>
               {/* 数えたときにともる やわらかい光 */}
               <Animated.View
                 style={[
@@ -175,19 +184,17 @@ const ThingsStage = forwardRef<ThingsStageHandle, Props>(function ThingsStage(
                   },
                 ]}
               />
-              <Animated.Text
-                style={[
-                  styles.thing,
-                  {
-                    fontSize: size * 0.72,
-                    lineHeight: size,
-                    opacity: e,
-                    transform: [{ scale }, { translateX }, { translateY }],
-                  },
-                ]}
-              >
-                {problem.char.emoji}
-              </Animated.Text>
+              <Animated.Image
+                source={problem.char.svg}
+                resizeMode="contain"
+                accessibilityLabel={problem.char.emoji}
+                style={{
+                  width: imgSize,
+                  height: imgSize,
+                  opacity: e,
+                  transform: [{ scale }, { translateX }, { translateY }],
+                }}
+              />
             </View>
           );
         })}
@@ -236,6 +243,11 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignContent: 'center',
   },
+  slot: {
+    // モノ1つぶんの枠。halo（絶対配置）と、少し大きめの素材画像を中央にそろえる。
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   halo: {
     position: 'absolute',
     top: 0,
@@ -245,8 +257,5 @@ const styles = StyleSheet.create({
     backgroundColor: colors.countHalo,
     borderWidth: 3,
     borderColor: colors.countRing,
-  },
-  thing: {
-    textAlign: 'center',
   },
 });

@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" role="img" aria-label="ひよこ">
+  <!-- white die-cut underlay -->
+  <g fill="#ffffff" stroke="#ffffff" stroke-width="15" stroke-linejoin="round" stroke-linecap="round">
+    <path d="M90,58 Q88,46 95,48 Q98,55 92,60 Z"/>
+    <path d="M100,58 Q100,46 106,50 Q104,58 98,60 Z"/>
+    <path d="M52,86 Q34,80 32,68 Q50,70 60,86 Z"/>
+    <path d="M50,98 Q34,96 34,84 Q50,86 58,98 Z"/>
+    <ellipse cx="94" cy="102" rx="46" ry="42"/>
+    <path d="M138,84 L160,82 L142,96 Z"/>
+    <path d="M138,98 L158,100 L140,106 Z"/>
+    <path d="M84,142 L84,166 M84,166 L76,172 M84,166 L92,172 M84,166 L84,174"/>
+    <path d="M104,142 L104,166 M104,166 L96,172 M104,166 L112,172 M104,166 L104,174"/>
+  </g>
+  <!-- legs -->
+  <path d="M84,140 L84,166 M84,166 L76,172 M84,166 L92,172 M84,166 L84,174" fill="none" stroke="#FF8A2E" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M104,140 L104,166 M104,166 L96,172 M104,166 L112,172 M104,166 L104,174" fill="none" stroke="#FF8A2E" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- tail feathers -->
+  <path d="M52,86 Q34,80 32,68 Q50,70 60,86 Z" fill="#FFC21F" stroke="#3d2a1c" stroke-width="3" stroke-linejoin="round"/>
+  <path d="M50,98 Q34,96 34,84 Q50,86 58,98 Z" fill="#FFC21F" stroke="#3d2a1c" stroke-width="3" stroke-linejoin="round"/>
+  <!-- head tuft -->
+  <path d="M90,58 Q88,46 95,48 Q98,55 92,60 Z" fill="#FFC21F" stroke="#3d2a1c" stroke-width="2.6" stroke-linejoin="round"/>
+  <path d="M100,58 Q100,46 106,50 Q104,58 98,60 Z" fill="#FFC21F" stroke="#3d2a1c" stroke-width="2.6" stroke-linejoin="round"/>
+  <!-- body -->
+  <ellipse cx="94" cy="102" rx="46" ry="42" fill="#FFCD33" stroke="#3d2a1c" stroke-width="3.2"/>
+  <!-- belly -->
+  <path d="M70,124 Q94,150 124,128 Q120,108 94,110 Q76,110 70,124 Z" fill="#FFE7A0"/>
+  <!-- beak (open) -->
+  <path d="M138,84 L160,82 L142,96 Z" fill="#FF8A2E" stroke="#3d2a1c" stroke-width="3" stroke-linejoin="round"/>
+  <path d="M138,98 L158,100 L140,106 Z" fill="#E9761F" stroke="#3d2a1c" stroke-width="3" stroke-linejoin="round"/>
+  <!-- wing -->
+  <path d="M82,96 Q66,102 72,124 Q88,130 98,114 Q96,100 82,96 Z" fill="#FFB300" stroke="#3d2a1c" stroke-width="3" stroke-linejoin="round"/>
+  <path d="M80,106 Q88,110 94,114 M80,114 Q86,117 92,120" fill="none" stroke="#E29800" stroke-width="2.2" stroke-linecap="round" opacity="0.8"/>
+  <!-- cheek -->
+  <ellipse cx="120" cy="102" rx="9" ry="6" fill="#ff7ba0" opacity="0.75"/>
+  <!-- eye -->
+  <circle cx="118" cy="88" r="8.5" fill="#2a1e16"/>
+  <circle cx="121" cy="85" r="3" fill="#fff"/>
+  <circle cx="115" cy="91" r="1.6" fill="#fff" opacity="0.85"/>
+  <!-- head highlight -->
+  <ellipse cx="80" cy="76" rx="12" ry="9" fill="#ffffff" opacity="0.28" transform="rotate(-18 80 76)"/>
+</svg>

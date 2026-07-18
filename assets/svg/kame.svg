@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" role="img" aria-label="かめ">
+  <!-- white die-cut underlay -->
+  <g fill="#ffffff" stroke="#ffffff" stroke-width="15" stroke-linejoin="round" stroke-linecap="round">
+    <path d="M40,120 L22,116 Q16,124 24,130 L44,130 Z"/>
+    <path d="M66,128 Q54,150 72,154 Q86,148 84,130 Z"/>
+    <path d="M122,128 Q110,150 128,154 Q142,148 140,130 Z"/>
+    <path d="M36,128 Q36,66 100,66 Q164,66 164,128 Q100,144 36,128 Z"/>
+    <circle cx="164" cy="112" r="21"/>
+  </g>
+  <!-- tail -->
+  <path d="M40,120 L22,116 Q16,124 24,130 L44,130 Z" fill="#6FCB86" stroke="#3d2a1c" stroke-width="3" stroke-linejoin="round"/>
+  <!-- legs -->
+  <path d="M66,128 Q54,150 72,154 Q86,148 84,130 Z" fill="#6FCB86" stroke="#3d2a1c" stroke-width="3" stroke-linejoin="round"/>
+  <path d="M122,128 Q110,150 128,154 Q142,148 140,130 Z" fill="#6FCB86" stroke="#3d2a1c" stroke-width="3" stroke-linejoin="round"/>
+  <!-- head -->
+  <circle cx="164" cy="112" r="21" fill="#7ED694" stroke="#3d2a1c" stroke-width="3.2"/>
+  <ellipse cx="171" cy="121" rx="6" ry="4.5" fill="#ff7ba0" opacity="0.7"/>
+  <circle cx="160" cy="108" r="4.2" fill="#2a1e16"/>
+  <circle cx="173" cy="108" r="4.2" fill="#2a1e16"/>
+  <circle cx="161.4" cy="106.6" r="1.5" fill="#fff"/>
+  <circle cx="174.4" cy="106.6" r="1.5" fill="#fff"/>
+  <path d="M160,118 Q166,123 172,118" fill="none" stroke="#3d2a1c" stroke-width="2.2" stroke-linecap="round"/>
+  <!-- shell -->
+  <path d="M36,128 Q36,66 100,66 Q164,66 164,128 Q100,144 36,128 Z" fill="#4CA863" stroke="#3d2a1c" stroke-width="3.2" stroke-linejoin="round"/>
+  <!-- shell plates -->
+  <path d="M100,84 L120,94 L120,116 L100,126 L80,116 L80,94 Z" fill="#77D18E" stroke="#3d2a1c" stroke-width="2.4" stroke-linejoin="round"/>
+  <g fill="none" stroke="#3d2a1c" stroke-width="2.4" stroke-linecap="round" opacity="0.85">
+    <path d="M100,84 L100,68"/>
+    <path d="M120,94 L146,82"/>
+    <path d="M120,116 L146,124"/>
+    <path d="M80,116 L54,124"/>
+    <path d="M80,94 L54,82"/>
+  </g>
+  <!-- rim highlight -->
+  <path d="M60,78 Q100,70 140,78" fill="none" stroke="#ffffff" stroke-width="3" stroke-linecap="round" opacity="0.35"/>
+</svg>

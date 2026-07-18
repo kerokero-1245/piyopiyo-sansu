@@ -7,25 +7,26 @@ import { CharDef, Op, Problem } from '../types';
 
 // キャラ表。ask は連濁を含んだ確定文字列（うさぎ・とりは「わ」、水の生き物・けものは「ひき」、
 // くだもの・まるいものは「こ」）。増やすときは連濁（なんびき等）に注意。
+// svg はシールポップ画風の素材（assets/svg/。INDEX.md 参照）。emoji は控え（音声・意味の記録）。
 const CHARS: CharDef[] = [
-  { emoji: '🐥', ask: 'なんわ' },
-  { emoji: '🐤', ask: 'なんわ' },
-  { emoji: '🐦', ask: 'なんわ' },
-  { emoji: '🐰', ask: 'なんわ' },
-  { emoji: '🐟', ask: 'なんびき' },
-  { emoji: '🐠', ask: 'なんびき' },
-  { emoji: '🐢', ask: 'なんびき' },
-  { emoji: '🐶', ask: 'なんびき' },
-  { emoji: '🐱', ask: 'なんびき' },
-  { emoji: '🐸', ask: 'なんびき' },
-  { emoji: '🍎', ask: 'なんこ' },
-  { emoji: '🍓', ask: 'なんこ' },
-  { emoji: '🍊', ask: 'なんこ' },
-  { emoji: '🍋', ask: 'なんこ' },
-  { emoji: '⭐', ask: 'なんこ' },
-  { emoji: '🎈', ask: 'なんこ' },
-  { emoji: '🍩', ask: 'なんこ' },
-  { emoji: '🌸', ask: 'なんこ' },
+  { emoji: '🐥', ask: 'なんわ', svg: require('../../assets/svg/hiyoko.svg') },
+  { emoji: '🐤', ask: 'なんわ', svg: require('../../assets/svg/piyo.svg') },
+  { emoji: '🐦', ask: 'なんわ', svg: require('../../assets/svg/tori.svg') },
+  { emoji: '🐰', ask: 'なんわ', svg: require('../../assets/svg/usagi.svg') },
+  { emoji: '🐟', ask: 'なんびき', svg: require('../../assets/svg/sakana.svg') },
+  { emoji: '🐠', ask: 'なんびき', svg: require('../../assets/svg/nettaigyo.svg') },
+  { emoji: '🐢', ask: 'なんびき', svg: require('../../assets/svg/kame.svg') },
+  { emoji: '🐶', ask: 'なんびき', svg: require('../../assets/svg/inu.svg') },
+  { emoji: '🐱', ask: 'なんびき', svg: require('../../assets/svg/neko.svg') },
+  { emoji: '🐸', ask: 'なんびき', svg: require('../../assets/svg/kaeru.svg') },
+  { emoji: '🍎', ask: 'なんこ', svg: require('../../assets/svg/ringo.svg') },
+  { emoji: '🍓', ask: 'なんこ', svg: require('../../assets/svg/ichigo.svg') },
+  { emoji: '🍊', ask: 'なんこ', svg: require('../../assets/svg/mikan.svg') },
+  { emoji: '🍋', ask: 'なんこ', svg: require('../../assets/svg/remon.svg') },
+  { emoji: '⭐', ask: 'なんこ', svg: require('../../assets/svg/hoshi.svg') },
+  { emoji: '🎈', ask: 'なんこ', svg: require('../../assets/svg/fuusen.svg') },
+  { emoji: '🍩', ask: 'なんこ', svg: require('../../assets/svg/doonatsu.svg') },
+  { emoji: '🌸', ask: 'なんこ', svg: require('../../assets/svg/sakura.svg') },
 ];
 
 function randInt(min: number, max: number): number {

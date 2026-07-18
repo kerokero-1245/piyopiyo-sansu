@@ -3,8 +3,11 @@
 // 数字スコアではなく、集めた⭐が並んでいくのを見せる。マイナス表示は一切なし。
 
 import React, { useEffect, useRef } from 'react';
-import { Animated, StyleSheet, View } from 'react-native';
+import { Animated, Image, StyleSheet, View } from 'react-native';
 import { colors } from '../theme';
+
+// クリア済みの⭐はシールポップ画風の素材（ほし）に差し替え。まだの丸ドットはそのまま。
+const HOSHI = require('../../assets/svg/hoshi.svg');
 
 export type StarState = 'off' | 'now' | 'star';
 
@@ -29,15 +32,15 @@ export default function ProgressStar({ state }: { state: StarState }) {
   return (
     <View style={styles.slot}>
       {state === 'star' ? (
-        <Animated.Text
+        <Animated.Image
+          source={HOSHI}
+          resizeMode="contain"
           style={[
             styles.star,
             // spring のオーバーシュートで軽く弾む（extend 補間）。
             { transform: [{ scale: pop.interpolate({ inputRange: [0, 1], outputRange: [0.2, 1] }) }] },
           ]}
-        >
-          ⭐
-        </Animated.Text>
+        />
       ) : (
         <View style={[styles.dot, state === 'now' ? styles.dotNow : styles.dotOff]} />
       )}
@@ -54,9 +57,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   star: {
-    fontSize: 22,
-    lineHeight: 26,
-    textAlign: 'center',
+    width: 24,
+    height: 24,
   },
   dot: {
     width: 16,

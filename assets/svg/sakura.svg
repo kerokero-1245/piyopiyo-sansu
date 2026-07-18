@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" role="img" aria-label="さくら">
+  <!-- white die-cut underlay -->
+  <g fill="#ffffff" stroke="#ffffff" stroke-width="15" stroke-linejoin="round" stroke-linecap="round">
+    <path transform="rotate(0 100 100)"   d="M100,100 C84,98 78,72 88,56 Q94,46 100,52 Q106,46 112,56 C122,72 116,98 100,100 Z"/>
+    <path transform="rotate(72 100 100)"  d="M100,100 C84,98 78,72 88,56 Q94,46 100,52 Q106,46 112,56 C122,72 116,98 100,100 Z"/>
+    <path transform="rotate(144 100 100)" d="M100,100 C84,98 78,72 88,56 Q94,46 100,52 Q106,46 112,56 C122,72 116,98 100,100 Z"/>
+    <path transform="rotate(216 100 100)" d="M100,100 C84,98 78,72 88,56 Q94,46 100,52 Q106,46 112,56 C122,72 116,98 100,100 Z"/>
+    <path transform="rotate(288 100 100)" d="M100,100 C84,98 78,72 88,56 Q94,46 100,52 Q106,46 112,56 C122,72 116,98 100,100 Z"/>
+  </g>
+  <!-- petals -->
+  <g fill="#FF9EBB" stroke="#3d2a1c" stroke-width="3" stroke-linejoin="round">
+    <path transform="rotate(0 100 100)"   d="M100,100 C84,98 78,72 88,56 Q94,46 100,52 Q106,46 112,56 C122,72 116,98 100,100 Z"/>
+    <path transform="rotate(72 100 100)"  d="M100,100 C84,98 78,72 88,56 Q94,46 100,52 Q106,46 112,56 C122,72 116,98 100,100 Z"/>
+    <path transform="rotate(144 100 100)" d="M100,100 C84,98 78,72 88,56 Q94,46 100,52 Q106,46 112,56 C122,72 116,98 100,100 Z"/>
+    <path transform="rotate(216 100 100)" d="M100,100 C84,98 78,72 88,56 Q94,46 100,52 Q106,46 112,56 C122,72 116,98 100,100 Z"/>
+    <path transform="rotate(288 100 100)" d="M100,100 C84,98 78,72 88,56 Q94,46 100,52 Q106,46 112,56 C122,72 116,98 100,100 Z"/>
+  </g>
+  <!-- petal veins -->
+  <g fill="none" stroke="#F06E9B" stroke-width="2.2" stroke-linecap="round" opacity="0.8">
+    <path transform="rotate(0 100 100)"   d="M100,96 L100,60 M100,72 L92,62 M100,72 L108,62"/>
+    <path transform="rotate(72 100 100)"  d="M100,96 L100,60 M100,72 L92,62 M100,72 L108,62"/>
+    <path transform="rotate(144 100 100)" d="M100,96 L100,60 M100,72 L92,62 M100,72 L108,62"/>
+    <path transform="rotate(216 100 100)" d="M100,96 L100,60 M100,72 L92,62 M100,72 L108,62"/>
+    <path transform="rotate(288 100 100)" d="M100,96 L100,60 M100,72 L92,62 M100,72 L108,62"/>
+  </g>
+  <!-- center -->
+  <circle cx="100" cy="100" r="14" fill="#FFD23D" stroke="#3d2a1c" stroke-width="3"/>
+  <g fill="#FF8A2E">
+    <circle cx="100" cy="88" r="2.6"/>
+    <circle cx="111" cy="96" r="2.6"/>
+    <circle cx="107" cy="109" r="2.6"/>
+    <circle cx="93" cy="109" r="2.6"/>
+    <circle cx="89" cy="96" r="2.6"/>
+  </g>
+  <circle cx="100" cy="100" r="4" fill="#F0A81E"/>
+</svg>

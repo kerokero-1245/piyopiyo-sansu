@@ -5,9 +5,12 @@ export type Op = 'add' | 'sub';
 
 // 使うキャラ。ask は連濁を含んだ確定文字列（例: 'なんわ' 'なんびき' 'なんこ'）で、
 // 連濁の間違いを避けるため計算せずそのまま表示する。
+// svg はシールポップ画風の素材（assets/svg/*.svg を require したもの）。ステージで絵として表示する。
+// emoji はフォールバック兼メタ情報として残す（音声・アクセシビリティ・素材差し替えの控え）。
 export interface CharDef {
   emoji: string;
   ask: string;
+  svg: import('react-native').ImageSourcePropType;
 }
 
 // 1問。
