@@ -10,6 +10,7 @@ export type MaxSum = 5 | 10;
 const KEY = 'sansu.maxSum';
 const STAR_KEY = 'sansu.totalStars';
 const TTS_KEY = 'sansu.tts';
+const BGM_KEY = 'sansu.bgm';
 const DEFAULT: MaxSum = 5;
 
 // 型の都合で最小限だけ宣言（DOM lib に依存しない）。
@@ -133,6 +134,39 @@ export function setTtsOn(on: boolean): void {
   if (store) {
     try {
       store.setItem(TTS_KEY, on ? 'on' : 'off');
+    } catch {
+      // 無視
+    }
+  }
+}
+
+// ── BGM（おんがく）オン/オフ ────────────────────────────────────────
+// ぴよぴよランド共通のオルゴール風BGM（bgm/engine）のオン/オフ。よみあげ（TTS）とは独立。
+// 既定は オン（ちいさな音量）。壊れた値は既定へ。しずかに あそびたい ときは おとなモードで オフに。
+// キーは4アプリ共通規約の sansu.bgm（localStorage）。
+let bgmCache: boolean | null = null;
+
+export function getBgmOn(): boolean {
+  if (bgmCache !== null) return bgmCache;
+  const store = ls();
+  if (store) {
+    try {
+      const v = store.getItem(BGM_KEY);
+      if (v === 'off') return (bgmCache = false);
+      if (v === 'on') return (bgmCache = true);
+    } catch {
+      // 無視して既定へ
+    }
+  }
+  return (bgmCache = true);
+}
+
+export function setBgmOn(on: boolean): void {
+  bgmCache = on;
+  const store = ls();
+  if (store) {
+    try {
+      store.setItem(BGM_KEY, on ? 'on' : 'off');
     } catch {
       // 無視
     }

@@ -29,6 +29,8 @@ interface SSUtterance {
   pitch: number;
   volume: number;
   voice: SSVoice | null;
+  onend: (() => void) | null;
+  onerror: (() => void) | null;
 }
 type UtteranceCtor = new (text?: string) => SSUtterance;
 interface SS {
@@ -114,14 +116,33 @@ export function warmUpSpeech(): void {
   }
 }
 
+// 直近の発声の「終了通知」（voice.ts のダッキング解除など）。多重発火を防ぐため、
+// 終了 / エラー / cancel / 差し替え のいずれか最初の1回だけ呼ぶ（呼んだら null にする）。
+let currentEnd: (() => void) | null = null;
+
+function fireCurrentEnd(): void {
+  const fn = currentEnd;
+  currentEnd = null;
+  if (fn) {
+    try {
+      fn();
+    } catch {
+      // 通知先が失敗しても遊びは壊さない
+    }
+  }
+}
+
 // text を ja-JP で少しゆっくり読み上げる。enabled=false / 非対応 では何もしない。
-export function speak(text: string, opts?: { enabled?: boolean }): void {
-  if (opts && opts.enabled === false) return;
+// onEnd: 発声が終わった（終了 / エラー / cancel / 差し替え）ときに1回だけ呼ばれる（任意）。
+// 戻り値: 実際に発声を始めたら true、非対応・オフなら false（呼び出し側がダッキングを畳める）。
+export function speak(text: string, opts?: { enabled?: boolean; onEnd?: () => void }): boolean {
+  if (opts && opts.enabled === false) return false;
   const s = getSynth();
   const U = getUtteranceCtor();
-  if (!s || !U) return;
+  if (!s || !U) return false;
   wireVoices();
   try {
+    fireCurrentEnd(); // 直前の発声の終了通知を先に畳む
     s.cancel(); // 前の発声を止めて重ならないように
     const u = new U(text);
     u.lang = 'ja-JP';
@@ -129,19 +150,27 @@ export function speak(text: string, opts?: { enabled?: boolean }): void {
     u.pitch = 1;
     u.volume = 1;
     if (jaVoice) u.voice = jaVoice;
+    currentEnd = opts && opts.onEnd ? opts.onEnd : null;
+    u.onend = () => fireCurrentEnd();
+    u.onerror = () => fireCurrentEnd();
     s.speak(u);
+    return true;
   } catch {
-    // 読み上げできなくても遊びは壊さない
+    // 読み上げできなくても遊びは壊さない。終了通知だけ畳んでおく（ダッキングを残さない）。
+    fireCurrentEnd();
+    return false;
   }
 }
 
-// 発声を止める（画面を離れるときなど）。
+// 発声を止める（画面を離れるときなど）。停止＝終了通知（ダッキング解除）も1回発火。
 export function cancelSpeech(): void {
   const s = getSynth();
-  if (!s) return;
-  try {
-    s.cancel();
-  } catch {
-    // 無視
+  if (s) {
+    try {
+      s.cancel();
+    } catch {
+      // 無視
+    }
   }
+  fireCurrentEnd();
 }

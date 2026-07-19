@@ -18,6 +18,8 @@ interface AudioEl {
   pause(): void;
   currentTime: number;
   muted: boolean;
+  onended: (() => void) | null;
+  onerror: (() => void) | null;
 }
 type AudioCtor = new (src?: string) => AudioEl;
 
@@ -37,8 +39,23 @@ export function isClipAvailable(name: string | undefined): boolean {
 }
 
 let current: AudioEl | null = null;
+// 再生中クリップの「終了通知」（voice.ts のダッキング解除など）。多重発火を防ぐため、
+// 自然終了 / エラー / 差し替え / cancel のいずれか最初の1回だけ呼ぶ（呼んだら null にする）。
+let currentEnd: (() => void) | null = null;
 
-// 直前の再生を止める（発声が重ならないように）。
+function fireCurrentEnd(): void {
+  const fn = currentEnd;
+  currentEnd = null;
+  if (fn) {
+    try {
+      fn();
+    } catch {
+      // 通知先が失敗しても再生・遊びは壊さない
+    }
+  }
+}
+
+// 直前の再生を止める（発声が重ならないように）。停止＝終了通知（ダッキング解除）も1回発火。
 export function cancelClip(): void {
   try {
     if (current) current.pause();
@@ -46,20 +63,42 @@ export function cancelClip(): void {
     // 無視
   }
   current = null;
+  fireCurrentEnd();
 }
 
 // name のクリップを再生する。鳴らせたら true、無理なら false（呼び出し側が tier2 へ）。
-export function playClip(name: string): boolean {
+// onEnd: 再生が終わった（自然終了 / エラー / 差し替え / cancel）ときに1回だけ呼ばれる（任意）。
+export function playClip(name: string, onEnd?: () => void): boolean {
   const A = getAudioCtor();
   if (!A || !hasClip(name)) return false;
   try {
-    cancelClip();
+    cancelClip(); // 直前のクリップを止め、その終了通知を発火してから始める
     const a = new A(CLIP_URLS[name]);
     current = a;
+    currentEnd = onEnd ?? null;
+    // 自然終了・エラーで終了通知（この要素がまだ current のときだけ）。
+    a.onended = () => {
+      if (current === a) {
+        current = null;
+        fireCurrentEnd();
+      }
+    };
+    a.onerror = () => {
+      if (current === a) {
+        current = null;
+        fireCurrentEnd();
+      }
+    };
     const p = a.play();
-    // play() の Promise 拒否（ユーザー操作前など）は握りつぶす（遊びは壊さない）。
+    // play() の Promise 拒否（ユーザー操作前など）は握りつぶす（遊びは壊さない）。再生できな
+    // かったときも終了通知は出す（ダッキングを解除して BGM を元の音量へ戻す）。
     if (p && typeof (p as Promise<void>).catch === 'function') {
-      (p as Promise<void>).catch(() => {});
+      (p as Promise<void>).catch(() => {
+        if (current === a) {
+          current = null;
+          fireCurrentEnd();
+        }
+      });
     }
     return true;
   } catch {

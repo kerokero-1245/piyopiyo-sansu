@@ -8,15 +8,18 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { colors, font, radius, space } from '../theme';
 import BigButton from '../components/BigButton';
 import {
+  getBgmOn,
   getMaxSum,
   getTotalStars,
   getTtsOn,
   MaxSum,
   resetStars,
+  setBgmOn,
   setMaxSum,
   setTtsOn,
 } from '../settings';
 import { playSound } from '../audio/sounds';
+import { applyBgmSetting } from '../audio/bgm';
 
 interface Props {
   onBack: () => void;
@@ -26,6 +29,7 @@ export default function OtonaScreen({ onBack }: Props) {
   const [maxSum, setMax] = useState<MaxSum>(getMaxSum());
   const [stars, setStars] = useState<number>(getTotalStars());
   const [tts, setTts] = useState<boolean>(getTtsOn()); // よみあげ する/しない
+  const [bgm, setBgm] = useState<boolean>(getBgmOn()); // BGM ながす/ながさない
   const [confirmReset, setConfirmReset] = useState(false); // 誤操作防止の2段階確認
 
   const choose = (v: MaxSum) => {
@@ -38,6 +42,14 @@ export default function OtonaScreen({ onBack }: Props) {
     playSound('tap');
     setTtsOn(on);
     setTts(on);
+  };
+
+  // BGM ながす/ながさない。押下＝ユーザー操作なので、ON にしたらその場で再開できる。
+  const onToggleBgm = (on: boolean) => {
+    playSound('tap');
+    setBgmOn(on); // localStorage（sansu.bgm）へ永続化
+    setBgm(on);
+    applyBgmSetting(on); // OFF=即フェード停止 / ON=このジェスチャで即再開
   };
 
   const onResetPress = () => {
@@ -111,6 +123,34 @@ export default function OtonaScreen({ onBack }: Props) {
         </View>
         <Text style={styles.note}>
           「する」だと せいかい や こえかけを よみます。おとが つかえない ときも あそべます。
+        </Text>
+      </View>
+
+      {/* BGM ながす/ながさない（ちいさな オルゴール風の おんがく）。よみあげとは別に切り替えられる。 */}
+      <View style={[styles.card, styles.cardGap]}>
+        <Text style={styles.label}>BGM（おんがく）</Text>
+        <View style={styles.options}>
+          <Pressable
+            onPress={() => onToggleBgm(true)}
+            accessibilityRole="button"
+            accessibilityState={{ selected: bgm }}
+            style={[styles.option, bgm ? styles.optionActive : styles.optionIdle]}
+          >
+            <Text style={[styles.optionText, bgm && styles.optionTextActive]}>ながす</Text>
+            {bgm ? <Text style={styles.check}>✓</Text> : null}
+          </Pressable>
+          <Pressable
+            onPress={() => onToggleBgm(false)}
+            accessibilityRole="button"
+            accessibilityState={{ selected: !bgm }}
+            style={[styles.option, !bgm ? styles.optionActive : styles.optionIdle]}
+          >
+            <Text style={[styles.optionText, !bgm && styles.optionTextActive]}>ながさない</Text>
+            {!bgm ? <Text style={styles.check}>✓</Text> : null}
+          </Pressable>
+        </View>
+        <Text style={styles.note}>
+          ちいさな おんがくが ながれます。しずかに あそびたい ときは「ながさない」に。
         </Text>
       </View>
 

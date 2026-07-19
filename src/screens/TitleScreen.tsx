@@ -7,6 +7,7 @@ import { colors, font, space } from '../theme';
 import BigButton from '../components/BigButton';
 import { playSound } from '../audio/sounds';
 import { sayPhrase, warmUpVoice } from '../audio/voice';
+import { startSansuBgm } from '../audio/bgm';
 import { getTtsOn } from '../settings';
 
 interface Props {
@@ -61,6 +62,7 @@ export default function TitleScreen({ onPlay, onOtona }: Props) {
   const sayTitle = () => {
     playSound('tap');
     warmUpVoice();
+    startSansuBgm(); // 最初のタップでBGMを開始（同一曲の再呼び出しは冪等）。読み上げオフでもBGMは鳴る
     sayPhrase('title', { enabled: getTtsOn() });
   };
 
@@ -100,6 +102,7 @@ export default function TitleScreen({ onPlay, onOtona }: Props) {
             onPress={() => {
               playSound('tap');
               warmUpVoice(); // 最初のタップで読み上げ（クリップ＋TTS）をアンロック
+              startSansuBgm(); // 同じジェスチャ内でBGM開始（自動再生制限を守る／冪等）
               onPlay();
             }}
           />

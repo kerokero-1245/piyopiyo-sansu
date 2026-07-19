@@ -12,6 +12,7 @@
 import { isClipAvailable, playClip, warmUpClips, cancelClip } from './clips';
 import { CLIP_URLS } from './voiceClips';
 import { speak, warmUpSpeech, cancelSpeech, isSpeechAvailable } from './speech';
+import { duckBgm, unduckBgm } from './bgm/engine';
 
 // 読み上げ1回ぶんの指定。clip=同梱クリップの基名（無ければ tier2 へ）/ text=フォールバック読み上げ文字列。
 export interface VoiceSpec {
@@ -38,14 +39,37 @@ export const PHRASE_VOICE: Record<PhraseKey, VoiceSpec> = {
 const WRONG_CHEERS: PhraseKey[] = ['oshii', 'arere'];
 let wrongCheerIdx = 0;
 
+// 声の再生中だけ BGM を控えめに下げる（ダッキング）。開始で沈め、終了（自然終了 / エラー /
+// 差し替え / 停止）で戻す。engine 側の duck はネスト対応（カウンタ）なので、声が重なっても
+// 過不足なく元の音量へ戻る。返す解除関数は1回だけ有効（二重解除しても engine 側で無害）。
+function beginDuck(): () => void {
+  duckBgm();
+  let released = false;
+  return () => {
+    if (released) return;
+    released = true;
+    unduckBgm();
+  };
+}
+
 // ── 再生（3段構えの解決）─────────────────────────────────────────────
 // enabled=false（おとなモードで読み上げオフ）なら何もしない。
+// 実際に声が鳴る tier だけ BgM をダッキングし、その声が終わったら戻す（効果音はダッキングしない）。
 export function playVoice(spec: VoiceSpec, opts?: { enabled?: boolean }): void {
   if (opts && opts.enabled === false) return;
-  // ① 同梱クリップ
-  if (isClipAvailable(spec.clip) && playClip(spec.clip as string)) return;
-  // ② speechSynthesis（無ければ speak が no-op ＝ ③ 無音）
-  speak(spec.text, { enabled: true });
+  // ① 同梱クリップ（tier1）
+  if (isClipAvailable(spec.clip)) {
+    const done = beginDuck();
+    if (playClip(spec.clip as string, done)) return;
+    done(); // 予期せず鳴らせなかったら、下げた音量を戻す
+  }
+  // ② speechSynthesis（tier2）
+  if (isSpeechAvailable()) {
+    const done = beginDuck();
+    if (speak(spec.text, { enabled: true, onEnd: done })) return;
+    done();
+  }
+  // ③ 無音（tier3）… 何もしない（ダッキングもしない）
 }
 
 // 定型フレーズを読む（せいかい／タイトル／ぜんぶできたね など）。

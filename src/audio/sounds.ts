@@ -87,6 +87,13 @@ function tone(c: AudioContext, freq: number, dur: number, type: OscillatorType, 
   osc.stop(at + dur + 0.02);
 }
 
+// BGM エンジン（bgm/engine）と同じ AudioContext を共有するための getter。
+// configureBgm({ getCtx }) に渡すと、効果音・声・BGM が同一 ctx を使う。web 以外／非対応では null。
+// 呼び出しは startBgm（ユーザー操作起点）の内側で1回だけ起きる（ctx はそこでキャッシュされる）。
+export function getAudioContext(): AudioContext | null {
+  return getCtx();
+}
+
 export function playSound(name: SoundName): void {
   const c = getCtx();
   if (!c) return; // native / 非対応環境では無音（MVP許容）
