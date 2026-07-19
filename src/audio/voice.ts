@@ -3,10 +3,9 @@
 //   ② speechSynthesis（tier2 / speech.ts）… ブラウザ内蔵の日本語合成音声（ja-JP）。
 //   ③ 無音（tier3）… どちらも無ければ何もしない。絵とアニメだけでゲームは成立する。
 //
-// 現状の同梱クリップは 'p_seikai'（せいかい！）のみ（voiceClips.CLIP_URLS）。よって「せいかい！」は
-// tier1、それ以外（タイトル・おしい・あれれ・ぜんぶできたね）は tier2 へ落ちる。後で VOICEVOX クリップを
-// assets/voice/ に足して voiceClips.ts に require を1行追加すれば、同じ呼び出しのまま tier1 が効く
-// （呼び出し側の変更は不要）。
+// 定型フレーズ（せいかい・タイトル・おしい・あれれ・ぜんぶできたね）はすべて同梱クリップを登録済みで
+// tier1 で鳴る（voiceClips.CLIP_URLS）。クリップ未同梱／非対応の環境だけ tier2（speechSynthesis）へ落ちる。
+// 呼び出し側は clip の有無を意識せず sayPhrase()／sayWrongCheer() を呼ぶだけでよい。
 //
 // iOS Safari の自動再生制限（最初のユーザー操作より前に音を出せない）は warmUpVoice() で守る。
 
@@ -28,10 +27,10 @@ export interface VoiceSpec {
 export type PhraseKey = 'seikai' | 'title' | 'oshii' | 'arere' | 'dekita';
 export const PHRASE_VOICE: Record<PhraseKey, VoiceSpec> = {
   seikai: { clip: 'p_seikai', text: 'せいかい' },
-  title: { clip: 'p_title', text: 'ぴよぴよさんすう' },
-  oshii: { clip: 'p_oshii', text: 'おしい' },
-  arere: { clip: 'p_arere', text: 'あれれ' },
-  dekita: { clip: 'p_dekita', text: 'ぜんぶ できたね' },
+  title: { clip: 't_sansu', text: 'ぴよぴよさんすう' },
+  oshii: { clip: 'e_oshii', text: 'おしい' },
+  arere: { clip: 'e_arere', text: 'あれれ' },
+  dekita: { clip: 'p_zenbu', text: 'ぜんぶ できたね' },
 };
 
 // 誤答タップの声かけを「おしい」→「あれれ」で交互に返すローテ（呼ぶたび1つ進む）。

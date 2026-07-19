@@ -2,7 +2,7 @@
 // 隅の歯車を3秒長押しでおとなモードへ（4歳が偶発しにくい親ゲート／DESIGN §6）。
 
 import React, { useRef } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Image, ImageSourcePropType, Pressable, StyleSheet, Text, View } from 'react-native';
 import { colors, font, space } from '../theme';
 import BigButton from '../components/BigButton';
 import { playSound } from '../audio/sounds';
@@ -15,6 +15,29 @@ interface Props {
 }
 
 const HOLD_MS = 3000;
+
+// 概念の絵に使う素材（本編と同じシールポップ画風。assets/svg / problems.ts と同一）。
+const ART_HIYOKO: ImageSourcePropType = require('../../assets/svg/hiyoko.svg');
+const ART_RINGO: ImageSourcePropType = require('../../assets/svg/ringo.svg');
+
+// 素材を count 個、絵文字と同じ横並びで描く（記号 ➕/➖ の左右に置く1グループ）。
+// 素材SVGは viewBox 内に余白が焼き込まれているので、絵文字と同等の存在感になる一辺で中央に並べる。
+function ConceptGroup({ source, count }: { source: ImageSourcePropType; count: number }) {
+  return (
+    <View style={styles.conceptGroup}>
+      {Array.from({ length: count }, (_, i) => (
+        <Image
+          key={i}
+          source={source}
+          style={styles.conceptImg}
+          resizeMode="contain"
+          accessible={false}
+          fadeDuration={0}
+        />
+      ))}
+    </View>
+  );
+}
 
 export default function TitleScreen({ onPlay, onOtona }: Props) {
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -55,16 +78,16 @@ export default function TitleScreen({ onPlay, onOtona }: Props) {
         </Pressable>
         <Text style={styles.subtitle}>かぞえて あそぼう</Text>
 
-        {/* 概念の絵: ふえる（🐥→🐥🐥🐥）/ へる（🍎🍎🍎→🍎） */}
+        {/* 概念の絵: ふえる（ひよこ2＋1）/ へる（りんご3−1）。本編と同じシールポップ素材で描く。 */}
         <View style={styles.concept}>
-          <Text style={styles.conceptEmoji}>🐥🐥</Text>
+          <ConceptGroup source={ART_HIYOKO} count={2} />
           <Text style={styles.conceptSign}>➕</Text>
-          <Text style={styles.conceptEmoji}>🐥</Text>
+          <ConceptGroup source={ART_HIYOKO} count={1} />
         </View>
         <View style={styles.concept}>
-          <Text style={styles.conceptEmoji}>🍎🍎🍎</Text>
+          <ConceptGroup source={ART_RINGO} count={3} />
           <Text style={styles.conceptSign}>➖</Text>
-          <Text style={styles.conceptEmoji}>🍎</Text>
+          <ConceptGroup source={ART_RINGO} count={1} />
         </View>
 
         <View style={styles.playWrap}>
@@ -124,8 +147,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginVertical: space.xs,
   },
-  conceptEmoji: {
-    fontSize: 34,
+  conceptGroup: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  conceptImg: {
+    // 旧・絵文字（fontSize 34）と同等の存在感になる一辺。素材の焼き込み余白ぶん少しだけ大きめ。
+    width: 42,
+    height: 42,
   },
   conceptSign: {
     fontSize: 26,

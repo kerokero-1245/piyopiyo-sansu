@@ -3,11 +3,10 @@
 よみあげ（DESIGN §4）の3段構え「①同梱クリップ → ②speechSynthesis → ③無音」の、**①クリップ**を置く場所。
 **VOICEVOX** により事前生成した日本語音声（`.m4a`）を同梱する。
 
-**同梱済み（1個）**: 定型句「せいかい！」（`p_seikai.m4a`）。正解時に tier1 として最優先で再生される。
-
-その他の読み上げ（タイトル「ぴよぴよさんすう」・誤答「おしい／あれれ」・がんばりカード「ぜんぶ できたね！」）は
-まだクリップを同梱しておらず、② speechSynthesis（ja-JP）で読む。クリップが無い／未対応の環境でも、絵とアニメだけで
-ゲームは完全に成立する（読み上げは「あると嬉しい」補助）。
+**同梱済み（5個）**: 「せいかい！」（`p_seikai.m4a`）／タイトル「ぴよぴよさんすう」（`t_sansu.m4a`）／
+誤答フォロー「おしい！」（`e_oshii.m4a`）・「あれれ？」（`e_arere.m4a`）／がんばりカード「ぜんぶ できたね！」（`p_zenbu.m4a`）。
+いずれも tier1 として最優先で再生される。クリップが無い／未対応の環境でも、② speechSynthesis（ja-JP）に落ちて読み、
+それも無ければ絵とアニメだけでゲームは完全に成立する（読み上げは「あると嬉しい」補助）。
 
 ## クレジット表記
 
@@ -30,23 +29,25 @@
 
 ## ファイル名の規約（基名）
 
+共有音声ライブラリ（`piyo-assets/voice`）の統一 id 規約に合わせる: `t_*`＝タイトル読み ／ `p_*`＝ほめ・定型句 ／
+`e_*`＝誤答フォロー（やわらか）。
+
 | 対象 | 基名 | 例 | フォールバック読み上げ |
 |---|---|---|---|
-| 定型フレーズ | `PHRASE_VOICE` の基名（`src/audio/voice.ts`） | `p_seikai.m4a` | `せいかい` |
+| 定型フレーズ | `PHRASE_VOICE` の `clip`（`src/audio/voice.ts`） | `p_seikai.m4a` | `せいかい` |
 
-対応表（クリップ基名 → 意味）は `src/audio/voice.ts` の `PHRASE_VOICE` が正典。
-`seikai`→`p_seikai` / `title`→`p_title` / `oshii`→`p_oshii` / `arere`→`p_arere` / `dekita`→`p_dekita`。
+対応表（フレーズキー → クリップ基名）は `src/audio/voice.ts` の `PHRASE_VOICE` が正典。
+`seikai`→`p_seikai` / `title`→`t_sansu` / `oshii`→`e_oshii` / `arere`→`e_arere` / `dekita`→`p_zenbu`。
 
 ## クリップを追加する手順（後工程）
 
-1. VOICEVOX で生成した音声をこのディレクトリに置く（ファイル基名＝上記の規約に一致させる）。
-   例: `p_title.m4a`（ぴよぴよさんすう）/ `p_oshii.m4a`（おしい）/ `p_arere.m4a`（あれれ）/ `p_dekita.m4a`（ぜんぶ できたね）。
+1. VOICEVOX で生成した音声をこのディレクトリに置く（ファイル基名＝共有ライブラリの id に合わせる）。
 2. web ビルドにバンドルするため、`src/audio/voiceClips.ts` の `CLIP_URLS` に `require()` で1行足す。例:
 
    ```ts
    export const CLIP_URLS: Record<string, string> = {
      p_seikai: require('../../assets/voice/p_seikai.m4a'),
-     p_title: require('../../assets/voice/p_title.m4a'),
+     t_sansu: require('../../assets/voice/t_sansu.m4a'),
    };
    ```
 
