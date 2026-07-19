@@ -15,6 +15,7 @@ import React, { forwardRef, useEffect, useImperativeHandle, useRef, useState } f
 import { Animated, Easing, StyleSheet, Text, View } from 'react-native';
 import { colors, font } from '../theme';
 import { CharDef, Op, Step } from '../types';
+import { gridPlan } from '../game/grid';
 import { playCountTone, playSound } from '../audio/sounds';
 
 // 素材SVG（viewBox 内に余白が焼き込まれている）を、絵文字と同等の存在感にするための描画倍率。
@@ -96,8 +97,8 @@ const ThingsStage = forwardRef<ThingsStageHandle, Props>(function ThingsStage(
   const positionsFor = (n: number): { x: number; y: number }[] => {
     const { stageW: W, stageH: H, size: S, gap: G } = dimsRef.current;
     if (n <= 0) return [];
-    const cols = n <= 5 ? n : Math.ceil(n / 2);
-    const rows = n <= 5 ? 1 : 2;
+    // 列数・行数は PlayScreen の computeThingSize と同じ共有ロジック（src/game/grid.ts）を使う。
+    const { cols, rows } = gridPlan(n);
     const gridH = rows * S + (rows - 1) * G;
     const contentH = Math.max(0, H - BADGE_H);
     const originY = BADGE_H + Math.max(0, (contentH - gridH) / 2);
@@ -234,7 +235,6 @@ const ThingsStage = forwardRef<ThingsStageHandle, Props>(function ThingsStage(
     countUp(onDone, slow) {
       const n = presentRef.current;
       pop.forEach((v) => v.setValue(0));
-      const stepMs = slow ? 680 : 440;
       const stepFn = (i: number) => {
         if (i >= n) {
           setCount(n);
@@ -244,6 +244,9 @@ const ThingsStage = forwardRef<ThingsStageHandle, Props>(function ThingsStage(
         setCount(i + 1);
         playCountTone(i);
         Animated.spring(pop[i], { toValue: 1, friction: 4, tension: 130, useNativeDriver: false }).start();
+        // 通常モードは 11個目以降（i>=10）を少しテンポアップ（440→330）。長い数え上げを間延びさせない。
+        // まちがい後のゆっくり提示（slow）は最後まで一定のゆっくりのまま（学びの反復は急がせない）。
+        const stepMs = slow ? 680 : i >= 10 ? 330 : 440;
         later(() => stepFn(i + 1), stepMs);
       };
       stepFn(0);

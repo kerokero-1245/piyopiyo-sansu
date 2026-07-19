@@ -6,7 +6,7 @@
 
 import { Platform } from 'react-native';
 
-export type MaxSum = 5 | 10;
+export type MaxSum = 5 | 10 | 20;
 const KEY = 'sansu.maxSum';
 const STAR_KEY = 'sansu.totalStars';
 const TTS_KEY = 'sansu.tts';
@@ -37,6 +37,7 @@ export function getMaxSum(): MaxSum {
   if (store) {
     try {
       const v = store.getItem(KEY);
+      if (v === '20') return (cache = 20);
       if (v === '10') return (cache = 10);
       if (v === '5') return (cache = 5);
     } catch {

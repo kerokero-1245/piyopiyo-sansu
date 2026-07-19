@@ -12,6 +12,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { LayoutChangeEvent, Pressable, StyleSheet, Text, View } from 'react-native';
 import { colors, font, radius, space } from '../theme';
 import { generateStorySet } from '../game/problems';
+import { sizingPlan } from '../game/grid';
 import { addStars, getMaxSum, getTtsOn } from '../settings';
 import { playSound } from '../audio/sounds';
 import { cancelVoice, sayDelta, sayPhrase, sayWrongCheer } from '../audio/voice';
@@ -32,16 +33,12 @@ const BADGE_RESERVE = 72; // ステージ内の数え上げバッジ帯のぶん
 // 正解時「せいかい！」を先に鳴らし、その少しあとに数え上げ演出を始める（順序厳守）。
 const SEIKAI_LEAD_MS = 600;
 
-// モノの並び方（1行あたりの数と行数）。5以下は1行、6以上は2行に均等割り。
-function gridPlan(renderCount: number): { cols: number; rows: number } {
-  if (renderCount <= 5) return { cols: Math.max(1, renderCount), rows: 1 };
-  const cols = Math.ceil(renderCount / 2);
-  return { cols, rows: 2 };
-}
+// モノの並び方（1行あたりの数と行数）は src/game/grid.ts に一本化（ThingsStage と共有）。
+// 配置は gridPlan(n)、サイズ見積もりは sizingPlan(maxCount)（現れうる最大列数で幅を確保）。
 
 // 実測した残り領域に、maxCount 個が収まるモノの1辺を求める（セット中は不変）。
 function computeThingSize(w: number, h: number, renderCount: number): number {
-  const { cols, rows } = gridPlan(renderCount);
+  const { cols, rows } = sizingPlan(renderCount);
   const usableW = Math.max(w - space.md * 2, 80);
   const usableH = Math.max(h - BADGE_RESERVE - space.md, 80);
   const byW = (usableW - (cols - 1) * GAP) / cols;

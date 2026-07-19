@@ -61,7 +61,7 @@ export function makeChoices(answer: number, maxSum: number): number[] {
 // delta（増減の大きさ）は小さめに寄せる（変化を1匹ずつ見せられるように）。
 // 1..maxAvail の範囲で、上限は cap（maxSum が小さいときはさらに小さく）でおさえる。
 function pickDelta(maxAvail: number, maxSum: number): number {
-  const cap = Math.min(maxAvail, maxSum <= 5 ? 3 : 4);
+  const cap = Math.min(maxAvail, maxSum <= 5 ? 3 : maxSum <= 10 ? 4 : 5);
   // 1〜2 を出やすくする軽い偏り（大きな飛びを減らす）。
   const r = Math.random();
   if (cap >= 2 && r < 0.5) return randInt(1, Math.min(2, cap));
@@ -75,49 +75,62 @@ export function generateStorySet(maxSum: number, count = 5, prevChar?: CharDef):
   const pool = prevChar ? CHARS.filter((c) => c.svg !== prevChar.svg) : CHARS;
   const char = pool[Math.floor(Math.random() * pool.length)];
 
-  // 最初のグループ数。増減どちらにも動ける中ほどから始める（2..maxSum-1）。
-  const initialCount = randInt(2, Math.max(2, maxSum - 1));
+  // 20まで は、お話の途中で必ず10をまたいで2桁の数を体験させたい。
+  // 生成は確率的なので maxCount≥11 になるまで作り直す（期待 約1.3 回・上限つき安全網）。
+  const needTwoDigit = maxSum >= 20;
 
-  const steps: Step[] = [];
-  let before = initialCount;
-  let maxCount = initialCount;
-  // 直前2問の演算（3連続同一を避けるため）。
-  const recent: Op[] = [];
+  let initialCount = 0;
+  let steps: Step[] = [];
+  let maxCount = 0;
+  for (let attempt = 0; ; attempt++) {
+    // 最初のグループ数。増減どちらにも動ける中ほどから始める（2..maxSum-1）。
+    // 20まで は 7..14 から始める。
+    initialCount = maxSum >= 20 ? randInt(7, 14) : randInt(2, Math.max(2, maxSum - 1));
 
-  for (let i = 0; i < count; i++) {
-    const canAdd = before < maxSum; // まだ増やせる（before+1 ≤ maxSum）
-    const canSub = before > 1; // まだ減らせる（before−1 ≥ 1）
+    steps = [];
+    let before = initialCount;
+    maxCount = initialCount;
+    // 直前2問の演算（3連続同一を避けるため）。
+    const recent: Op[] = [];
 
-    // 候補の演算。直前2問が同じ演算なら、可能なら反対の演算にして3連続を避ける。
-    let op: Op;
-    const both = canAdd && canSub;
-    const sameStreak = recent.length >= 2 && recent[recent.length - 1] === recent[recent.length - 2];
-    if (!canAdd) {
-      op = 'sub';
-    } else if (!canSub) {
-      op = 'add';
-    } else if (sameStreak) {
-      op = recent[recent.length - 1] === 'add' ? 'sub' : 'add';
-    } else if (both) {
-      op = Math.random() < 0.5 ? 'add' : 'sub';
-    } else {
-      op = canAdd ? 'add' : 'sub';
+    for (let i = 0; i < count; i++) {
+      const canAdd = before < maxSum; // まだ増やせる（before+1 ≤ maxSum）
+      const canSub = before > 1; // まだ減らせる（before−1 ≥ 1）
+
+      // 候補の演算。直前2問が同じ演算なら、可能なら反対の演算にして3連続を避ける。
+      let op: Op;
+      const both = canAdd && canSub;
+      const sameStreak = recent.length >= 2 && recent[recent.length - 1] === recent[recent.length - 2];
+      if (!canAdd) {
+        op = 'sub';
+      } else if (!canSub) {
+        op = 'add';
+      } else if (sameStreak) {
+        op = recent[recent.length - 1] === 'add' ? 'sub' : 'add';
+      } else if (both) {
+        op = Math.random() < 0.5 ? 'add' : 'sub';
+      } else {
+        op = canAdd ? 'add' : 'sub';
+      }
+
+      let delta: number;
+      let answer: number;
+      if (op === 'add') {
+        delta = pickDelta(maxSum - before, maxSum);
+        answer = before + delta;
+      } else {
+        delta = pickDelta(before - 1, maxSum);
+        answer = before - delta;
+      }
+
+      steps.push({ op, before, delta, answer, choices: makeChoices(answer, maxSum) });
+      recent.push(op);
+      if (answer > maxCount) maxCount = answer;
+      before = answer;
     }
 
-    let delta: number;
-    let answer: number;
-    if (op === 'add') {
-      delta = pickDelta(maxSum - before, maxSum);
-      answer = before + delta;
-    } else {
-      delta = pickDelta(before - 1, maxSum);
-      answer = before - delta;
-    }
-
-    steps.push({ op, before, delta, answer, choices: makeChoices(answer, maxSum) });
-    recent.push(op);
-    if (answer > maxCount) maxCount = answer;
-    before = answer;
+    // 2桁到達（maxCount≥11）を満たすか、上限に達したら確定。
+    if (!needTwoDigit || maxCount >= 11 || attempt >= 40) break;
   }
 
   return { char, initialCount, steps, maxCount };
