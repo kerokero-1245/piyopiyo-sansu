@@ -13,14 +13,23 @@ export interface CharDef {
   svg: import('react-native').ImageSourcePropType;
 }
 
-// 1問。
-export interface Problem {
-  op: Op;
-  a: number; // 最初の数（≥1）
-  b: number; // 増える/減る数（≥1）
-  answer: number; // add: a+b / sub: a−b（常に 1..maxSum）
-  char: CharDef;
+// つづきもの（連鎖出題）の1問＝1つの増減。DESIGN §15。
+// 1セット5問は「ひとつづきのお話」で、同じ種・同じ助数詞のグループが画面に残ったまま、
+// 各問でその場に増減が起きる。前問の答え（before）を開始数として次の増減がかかる。
+export interface Step {
+  op: Op; // add=ふえる / sub=へる（増減の向き。before と answer の大小と一致）
+  before: number; // この問題の開始数（＝前問の答え。第1問は初期グループ initialCount）
+  delta: number; // 増える/減る数（≥1）
+  answer: number; // before+delta（add）/ before−delta（sub）。常に 1..maxSum
   choices: number[]; // answer を含む3つ・シャッフル済み
+}
+
+// 1セット＝ひとつづきのお話。char/助数詞はセット内で不変（同じ動物種で通す）。
+export interface StorySet {
+  char: CharDef; // このお話の主役（種・助数詞はセット内で固定）
+  initialCount: number; // 最初に登場するグループの数（＝steps[0].before）
+  steps: Step[]; // 連鎖する増減（既定5問）。steps[i].before === steps[i-1].answer
+  maxCount: number; // このお話で画面に出る最大数（initialCount と各 answer の最大）。サイズ計算用
 }
 
 // 画面ルート（文字ヘッダの無い最小ステートルーター）。

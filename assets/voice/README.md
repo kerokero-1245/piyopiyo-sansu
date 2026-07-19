@@ -39,6 +39,14 @@
 対応表（フレーズキー → クリップ基名）は `src/audio/voice.ts` の `PHRASE_VOICE` が正典。
 `seikai`→`p_seikai` / `title`→`t_sansu` / `oshii`→`e_oshii` / `arere`→`e_arere` / `dekita`→`p_zenbu`。
 
+### つづきものモードの増減クリップ（`kitayo`/`kaettayo`・DESIGN §15）
+
+連鎖出題で「1匹きたよ！／かえったよ」を言う `kitayo`→`p_kitayo`・`kaettayo`→`p_kaettayo` を追加した。
+**現状は同梱クリップ未生成**のため tier2（speechSynthesis）が「きたよ」「かえったよ」を読む（3段構えのフォールバック）。
+実装はクリップの有無に依存しないので、後日 VOICEVOX で生成できたら本ディレクトリに `p_kitayo.m4a`/`p_kaettayo.m4a` を置き、
+`src/audio/voiceClips.ts` の `CLIP_URLS` に `require()` を2行足すだけで tier1 に昇格する（呼び出し側の変更は不要）。
+生成条件は他の `p_*` と同じ（ずんだもん/あまあま id 1・`speedScale`=0.95・24kHz mono → AAC 64kbps m4a）。共有ライブラリ `piyo-assets/voice` にも同 id で配布し `INDEX.md` を更新すること。
+
 ## クリップを追加する手順（後工程）
 
 1. VOICEVOX で生成した音声をこのディレクトリに置く（ファイル基名＝共有ライブラリの id に合わせる）。

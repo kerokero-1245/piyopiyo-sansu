@@ -1,9 +1,13 @@
-// 問題生成（DESIGN §7）。シード無しのランダム。
-// - たしざん: a≥1, b≥1, a+b≤maxSum → answer = a+b（2..maxSum）
-// - ひきざん: a in 2..maxSum, b in 1..a-1 → answer = a−b（1..maxSum-1）
+// つづきもの（連鎖）出題の生成（DESIGN §15）。シード無しのランダム。
+//
+// 1セット5問＝ひとつづきのお話。セット開始時に動物種を1つ選び、5問とも同じ種・同じ助数詞で通す。
+// 各問の「開始数（before）」は前問の答え（answer）。第1問だけ最初のグループ initialCount から始まる。
+// - たしざん（ふえる）: answer = before + delta（before+delta ≤ maxSum、delta≥1）
+// - ひきざん（へる）  : answer = before − delta（answer ≥ 1、delta≥1）
 // どちらも answer は 1..maxSum に収まる。選択肢は answer を含む近い数3つをシャッフル。
+// 同じ演算が3連続以上続かない程度の揺らぎを入れ、たし・ひきを混ぜる。
 
-import { CharDef, Op, Problem } from '../types';
+import { CharDef, Op, Step, StorySet } from '../types';
 
 // キャラ表。ask は連濁を含んだ確定文字列（うさぎ・とりは「わ」、水の生き物・けものは「ひき」、
 // くだもの・まるいものは「こ」）。増やすときは連濁（なんびき等）に注意。
@@ -32,9 +36,6 @@ const CHARS: CharDef[] = [
 function randInt(min: number, max: number): number {
   return min + Math.floor(Math.random() * (max - min + 1));
 }
-function pick<T>(arr: T[]): T {
-  return arr[Math.floor(Math.random() * arr.length)];
-}
 function shuffle<T>(arr: T[]): T[] {
   const out = arr.slice();
   for (let i = out.length - 1; i > 0; i--) {
@@ -57,36 +58,67 @@ export function makeChoices(answer: number, maxSum: number): number[] {
   return shuffle(Array.from(set));
 }
 
-export function generateProblem(maxSum: number): Problem {
-  const op: Op = Math.random() < 0.5 ? 'add' : 'sub';
-  let a: number;
-  let b: number;
-  let answer: number;
-  if (op === 'add') {
-    a = randInt(1, maxSum - 1);
-    b = randInt(1, maxSum - a);
-    answer = a + b;
-  } else {
-    a = randInt(2, maxSum);
-    b = randInt(1, a - 1);
-    answer = a - b;
-  }
-  return { op, a, b, answer, char: pick(CHARS), choices: makeChoices(answer, maxSum) };
+// delta（増減の大きさ）は小さめに寄せる（変化を1匹ずつ見せられるように）。
+// 1..maxAvail の範囲で、上限は cap（maxSum が小さいときはさらに小さく）でおさえる。
+function pickDelta(maxAvail: number, maxSum: number): number {
+  const cap = Math.min(maxAvail, maxSum <= 5 ? 3 : 4);
+  // 1〜2 を出やすくする軽い偏り（大きな飛びを減らす）。
+  const r = Math.random();
+  if (cap >= 2 && r < 0.5) return randInt(1, Math.min(2, cap));
+  return randInt(1, cap);
 }
 
-// 1セット（既定5問）。前問と同じ (op,a,b) の連続だけ軽く避ける（シード固定はしない）。
-export function generateSet(maxSum: number, count = 5): Problem[] {
-  const out: Problem[] = [];
-  let prev: Problem | null = null;
+// 1セット（既定5問）＝ひとつづきのお話を作る。
+// prevChar を渡すと、それと別の種を選ぶ（セットごとに主役が変わる感を出す）。
+export function generateStorySet(maxSum: number, count = 5, prevChar?: CharDef): StorySet {
+  // 主役の種を選ぶ（直前セットと別種に）。
+  const pool = prevChar ? CHARS.filter((c) => c.svg !== prevChar.svg) : CHARS;
+  const char = pool[Math.floor(Math.random() * pool.length)];
+
+  // 最初のグループ数。増減どちらにも動ける中ほどから始める（2..maxSum-1）。
+  const initialCount = randInt(2, Math.max(2, maxSum - 1));
+
+  const steps: Step[] = [];
+  let before = initialCount;
+  let maxCount = initialCount;
+  // 直前2問の演算（3連続同一を避けるため）。
+  const recent: Op[] = [];
+
   for (let i = 0; i < count; i++) {
-    let p = generateProblem(maxSum);
-    let guard = 0;
-    while (prev && p.op === prev.op && p.a === prev.a && p.b === prev.b && guard < 8) {
-      p = generateProblem(maxSum);
-      guard++;
+    const canAdd = before < maxSum; // まだ増やせる（before+1 ≤ maxSum）
+    const canSub = before > 1; // まだ減らせる（before−1 ≥ 1）
+
+    // 候補の演算。直前2問が同じ演算なら、可能なら反対の演算にして3連続を避ける。
+    let op: Op;
+    const both = canAdd && canSub;
+    const sameStreak = recent.length >= 2 && recent[recent.length - 1] === recent[recent.length - 2];
+    if (!canAdd) {
+      op = 'sub';
+    } else if (!canSub) {
+      op = 'add';
+    } else if (sameStreak) {
+      op = recent[recent.length - 1] === 'add' ? 'sub' : 'add';
+    } else if (both) {
+      op = Math.random() < 0.5 ? 'add' : 'sub';
+    } else {
+      op = canAdd ? 'add' : 'sub';
     }
-    out.push(p);
-    prev = p;
+
+    let delta: number;
+    let answer: number;
+    if (op === 'add') {
+      delta = pickDelta(maxSum - before, maxSum);
+      answer = before + delta;
+    } else {
+      delta = pickDelta(before - 1, maxSum);
+      answer = before - delta;
+    }
+
+    steps.push({ op, before, delta, answer, choices: makeChoices(answer, maxSum) });
+    recent.push(op);
+    if (answer > maxCount) maxCount = answer;
+    before = answer;
   }
-  return out;
+
+  return { char, initialCount, steps, maxCount };
 }
