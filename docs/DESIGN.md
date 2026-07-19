@@ -363,7 +363,7 @@ interface StorySet { char: CharDef; initialCount: number; steps: Step[]; maxCoun
 
 ### 音声（DESIGN §4 の3段構えに1組追加）
 
-- 増減の合図に `kitayo`/`kaettayo`（`PHRASE_VOICE`。クリップ基名 `p_kitayo`/`p_kaettayo`）を追加。**実装はクリップの有無に依存しない**: 同梱クリップがあれば tier1、無ければ tier2（speechSynthesis が「きたよ」「かえったよ」を読む）、それも無ければ tier3（無音）。現状は同梱クリップ未生成のため tier2（TTS）で鳴る。クリップを後日生成したら `assets/voice/` に置き `voiceClips.ts` に1行足すだけ（呼び出し側の変更不要）。
+- 増減の合図に `kitayo`/`kaettayo`（`PHRASE_VOICE`。クリップ基名 `p_kitayo`/`p_kaettayo`）を追加。**実装はクリップの有無に依存しない**: 同梱クリップがあれば tier1、無ければ tier2（speechSynthesis が「きたよ」「かえったよ」を読む）、それも無ければ tier3（無音）。2026-07-19 に VOICEVOX（ずんだもん・あまあま）でクリップを生成・同梱し tier1 で鳴る（`assets/voice/p_kitayo.m4a`／`p_kaettayo.m4a`・`voiceClips.ts` に登録済み。生成条件は他クリップと同一、`assets/voice/README.md` 参照）。
 
 ### 不変条件（このモードでも維持）
 

@@ -3,8 +3,9 @@
 よみあげ（DESIGN §4）の3段構え「①同梱クリップ → ②speechSynthesis → ③無音」の、**①クリップ**を置く場所。
 **VOICEVOX** により事前生成した日本語音声（`.m4a`）を同梱する。
 
-**同梱済み（5個）**: 「せいかい！」（`p_seikai.m4a`）／タイトル「ぴよぴよさんすう」（`t_sansu.m4a`）／
-誤答フォロー「おしい！」（`e_oshii.m4a`）・「あれれ？」（`e_arere.m4a`）／がんばりカード「ぜんぶ できたね！」（`p_zenbu.m4a`）。
+**同梱済み（7個）**: 「せいかい！」（`p_seikai.m4a`）／タイトル「ぴよぴよさんすう」（`t_sansu.m4a`）／
+誤答フォロー「おしい！」（`e_oshii.m4a`）・「あれれ？」（`e_arere.m4a`）／がんばりカード「ぜんぶ できたね！」（`p_zenbu.m4a`）／
+つづきものの増減の合図「きたよ！」（`p_kitayo.m4a`）・「かえったよ」（`p_kaettayo.m4a`）。
 いずれも tier1 として最優先で再生される。クリップが無い／未対応の環境でも、② speechSynthesis（ja-JP）に落ちて読み、
 それも無ければ絵とアニメだけでゲームは完全に成立する（読み上げは「あると嬉しい」補助）。
 
@@ -18,7 +19,7 @@
 |---|---|
 | エンジン | VOICEVOX ENGINE 0.25.2（macOS x64 CPU・公式GitHubリリース） |
 | 話者 / スタイル | ずんだもん / あまあま（`speaker` = style id **1**） |
-| 速度 | `speedScale` = 0.95（`p_seikai`） |
+| 速度 | `speedScale` = 0.95（`p_*`・`e_*`）／ 0.92（タイトル `t_sansu`） |
 | その他パラメータ | `audio_query` の既定値（pitch/intonation 等は変更なし） |
 | 音声形式 | 24kHz モノラル WAV → `afconvert -f m4af -d aac -b 64000`（AAC 64kbps モノラル m4a） |
 
@@ -41,11 +42,12 @@
 
 ### つづきものモードの増減クリップ（`kitayo`/`kaettayo`・DESIGN §15）
 
-連鎖出題で「1匹きたよ！／かえったよ」を言う `kitayo`→`p_kitayo`・`kaettayo`→`p_kaettayo` を追加した。
-**現状は同梱クリップ未生成**のため tier2（speechSynthesis）が「きたよ」「かえったよ」を読む（3段構えのフォールバック）。
-実装はクリップの有無に依存しないので、後日 VOICEVOX で生成できたら本ディレクトリに `p_kitayo.m4a`/`p_kaettayo.m4a` を置き、
-`src/audio/voiceClips.ts` の `CLIP_URLS` に `require()` を2行足すだけで tier1 に昇格する（呼び出し側の変更は不要）。
-生成条件は他の `p_*` と同じ（ずんだもん/あまあま id 1・`speedScale`=0.95・24kHz mono → AAC 64kbps m4a）。共有ライブラリ `piyo-assets/voice` にも同 id で配布し `INDEX.md` を更新すること。
+連鎖出題で「きたよ！（増）／かえったよ（減）」を言う `kitayo`→`p_kitayo`・`kaettayo`→`p_kaettayo`。
+2026-07-19 に VOICEVOX で生成し**同梱済み（tier1）**。生成条件は他の `p_*` と同じ
+（ずんだもん/あまあま id 1・`speedScale`=0.95・enable_interrogative_upspeak・24kHz mono → AAC 64kbps m4a）。
+実装はクリップの有無に依存しない設計のまま: 万一クリップを外しても tier2（speechSynthesis）が
+「きたよ」「かえったよ」を読み、それも無ければ tier3（無音）でゲームは成立する。
+共有ライブラリ `piyo-assets/voice` にも同 id で収録済み（`INDEX.md` 参照）。
 
 ## クリップを追加する手順（後工程）
 

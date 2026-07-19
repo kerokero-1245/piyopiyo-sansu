@@ -7,7 +7,8 @@
 // value = 再生可能な URL（require の戻り値）。
 //
 // 登録した基名は clips.ts が tier1 として最優先で再生する（呼び出し側の変更は不要）。
-// 定型フレーズ（せいかい／タイトル／おしい／あれれ／ぜんぶできたね）はすべて tier1 クリップを同梱済み。
+// 定型フレーズ（せいかい／タイトル／おしい／あれれ／ぜんぶできたね／きたよ／かえったよ）は
+// すべて tier1 クリップを同梱済み。
 // 未登録の基名は voice.ts が自動で tier2（speechSynthesis）へフォールバックする。
 // 外部送信ゼロ: クリップは端末内の同梱アセット。ネットワークは使わない。
 
@@ -20,6 +21,8 @@ export const CLIP_URLS: Record<string, string> = {
   e_oshii: require('../../assets/voice/e_oshii.m4a'), // おしい！（誤答フォロー）
   e_arere: require('../../assets/voice/e_arere.m4a'), // あれれ？（誤答フォロー）
   p_zenbu: require('../../assets/voice/p_zenbu.m4a'), // ぜんぶ できたね！（がんばりカード）
+  p_kitayo: require('../../assets/voice/p_kitayo.m4a'), // きたよ！（つづきもの・増の合図）
+  p_kaettayo: require('../../assets/voice/p_kaettayo.m4a'), // かえったよ（つづきもの・減の合図）
 };
 
 // 指定した基名のクリップが登録済みか。
