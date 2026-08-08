@@ -87,6 +87,11 @@ export default function PlayScreen({ onHome }: Props) {
   const step = story.steps[index];
   // モノの大きさは「このお話で出る最大数」に合わせる（セット中は不変）。
   const size = computeThingSize(measured.w, measured.h, story.maxCount);
+  // 選択肢のドット欄は「かずの おおきさ」で出うる最大値の行数（5個/行）ぶんを常に確保する。
+  // 問題ごとの数でボタンの高さが変わると、flex:1 のステージが伸び縮みし、モノの大きさと
+  // 置き場所がズレて下の段が切れる（20まで の 515x684 で実際に発生）。行数を固定して防ぐ。
+  // 5まで=1行 / 10まで=2行 は従来の下限 34 に収まるので、見た目は1pxも変わらない。
+  const choiceDotRows = Math.ceil(maxSumRef.current / 5);
 
   const onStageLayout = (e: LayoutChangeEvent) => {
     const { width, height } = e.nativeEvent.layout;
@@ -243,6 +248,7 @@ export default function PlayScreen({ onHome }: Props) {
             key={c}
             value={c}
             disabled={choicesDisabled}
+            reserveRows={choiceDotRows}
             shakeNonce={wrongValue === c ? wrongNonce : 0}
             onPress={() => onChoice(c)}
           />

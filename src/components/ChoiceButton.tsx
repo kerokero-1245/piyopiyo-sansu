@@ -11,7 +11,15 @@ interface Props {
   onPress: () => void;
   disabled?: boolean;
   shakeNonce?: number; // 0 = 震えない。>0 に変わると1回震える。
+  // ドット欄に確保する行数（＝「かずの おおきさ」で出うる最大値の行数）。
+  // これを固定しないと、問題ごとに選択肢ボタンの高さが変わり → ステージが伸び縮みし →
+  // モノの大きさと置き場所がズレて、下の段が切れる（DESIGN §8「可視領域を絶対にはみ出さない」）。
+  reserveRows?: number;
 }
+
+const DOT = 13; // ドット1つの直径（styles.dot と一致させる）
+const DOT_GAP = 5; // 行間（styles.dots の rowGap と一致させる）
+const DOTS_MIN_H = 34; // 1〜2行のときの従来の下限（5まで/10まで の見た目を1pxも変えない）
 
 // value 個のドットを最大5個/行で並べる。
 function dotRows(value: number): number[][] {
@@ -23,7 +31,13 @@ function dotRows(value: number): number[][] {
   return rows;
 }
 
-export default function ChoiceButton({ value, onPress, disabled, shakeNonce = 0 }: Props) {
+// rows 行を置くのに必要な高さ。1〜2行は従来の下限（34）に収まるので見た目は変わらない。
+function dotsHeight(rows: number): number {
+  const n = Math.max(1, rows);
+  return Math.max(DOTS_MIN_H, n * DOT + (n - 1) * DOT_GAP);
+}
+
+export default function ChoiceButton({ value, onPress, disabled, shakeNonce = 0, reserveRows = 1 }: Props) {
   const shake = useRef(new Animated.Value(0)).current;
   const prevNonce = useRef(0);
 
@@ -56,7 +70,7 @@ export default function ChoiceButton({ value, onPress, disabled, shakeNonce = 0 
           disabled && styles.disabled,
         ]}
       >
-        <View style={styles.dots}>
+        <View style={[styles.dots, { minHeight: dotsHeight(reserveRows) }]}>
           {dotRows(value).map((row, r) => (
             <View key={r} style={styles.dotRow}>
               {row.map((k) => (
@@ -97,8 +111,9 @@ const styles = StyleSheet.create({
   dots: {
     alignItems: 'center',
     justifyContent: 'center',
-    rowGap: 5,
-    minHeight: 34,
+    rowGap: DOT_GAP,
+    // 実際の下限は reserveRows から算出して上書きする（dotsHeight）。
+    minHeight: DOTS_MIN_H,
   },
   dotRow: {
     flexDirection: 'row',
