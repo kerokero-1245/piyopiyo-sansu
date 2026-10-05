@@ -2,9 +2,10 @@
 // あつめた ほし（累計⭐）の表示・リセット（DESIGN §7・§14）。
 // 変更は次のもんだいから反映される（PlayScreen がマウント時に設定を読む）。
 // 項目が増えても背の低い画面で「もどる」が隠れないよう、内容は ScrollView に入れる（DESIGN §8）。
+// 選択肢の文字は枠の幅から大きさを決め、✓ は文字の横ではなく右上に重ねて、狭い画面でも1行に収める。
 
 import React, { useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 import { colors, font, radius, space } from '../theme';
 import BigButton from '../components/BigButton';
 import {
@@ -25,7 +26,23 @@ interface Props {
   onBack: () => void;
 }
 
+const CARD_PAD = space.md; // カードの内側の余白
+const OPTION_GAP = space.sm; // 選択肢どうしの間
+const OPTION_PAD = 4; // 選択肢の内側の左右の余白
+
+// 3つ並びの選択肢（「10まで」が いちばん長い ≒ 3.1字ぶん）が1行に収まる文字の大きさ。
+// 枠（最大幅 480・左右 space.md）→ カード（枠線1・余白 CARD_PAD）→ 選択肢（枠線3・余白 OPTION_PAD）の内側の幅から決める。
+// 2つ並びの最長「ながさない」（≒4.6字）は、2つ並びの方が幅が広いのでこの大きさで収まる。
+function optionFontSize(windowW: number): number {
+  const frameW = Math.min(windowW, 480) - space.md * 2;
+  const cardInner = frameW - CARD_PAD * 2 - 2;
+  const optionInner = (cardInner - OPTION_GAP * 2) / 3 - 3 * 2 - OPTION_PAD * 2;
+  return Math.min(font.big, Math.floor(optionInner / 3.3));
+}
+
 export default function OtonaScreen({ onBack }: Props) {
+  const { width: windowW } = useWindowDimensions();
+  const optionFont = { fontSize: optionFontSize(windowW) };
   const [maxSum, setMax] = useState<MaxSum>(getMaxSum());
   const [stars, setStars] = useState<number>(getTotalStars());
   const [tts, setTts] = useState<boolean>(getTtsOn()); // よみあげ する/しない
@@ -72,7 +89,7 @@ export default function OtonaScreen({ onBack }: Props) {
         accessibilityState={{ selected: active }}
         style={[styles.option, active ? styles.optionActive : styles.optionIdle]}
       >
-        <Text style={[styles.optionText, active && styles.optionTextActive]}>{label}</Text>
+        <Text style={[styles.optionText, optionFont, active && styles.optionTextActive]}>{label}</Text>
         {active ? <Text style={styles.check}>✓</Text> : null}
       </Pressable>
     );
@@ -109,7 +126,7 @@ export default function OtonaScreen({ onBack }: Props) {
             accessibilityState={{ selected: tts }}
             style={[styles.option, tts ? styles.optionActive : styles.optionIdle]}
           >
-            <Text style={[styles.optionText, tts && styles.optionTextActive]}>する</Text>
+            <Text style={[styles.optionText, optionFont, tts && styles.optionTextActive]}>する</Text>
             {tts ? <Text style={styles.check}>✓</Text> : null}
           </Pressable>
           <Pressable
@@ -118,7 +135,7 @@ export default function OtonaScreen({ onBack }: Props) {
             accessibilityState={{ selected: !tts }}
             style={[styles.option, !tts ? styles.optionActive : styles.optionIdle]}
           >
-            <Text style={[styles.optionText, !tts && styles.optionTextActive]}>しない</Text>
+            <Text style={[styles.optionText, optionFont, !tts && styles.optionTextActive]}>しない</Text>
             {!tts ? <Text style={styles.check}>✓</Text> : null}
           </Pressable>
         </View>
@@ -137,7 +154,7 @@ export default function OtonaScreen({ onBack }: Props) {
             accessibilityState={{ selected: bgm }}
             style={[styles.option, bgm ? styles.optionActive : styles.optionIdle]}
           >
-            <Text style={[styles.optionText, bgm && styles.optionTextActive]}>ながす</Text>
+            <Text style={[styles.optionText, optionFont, bgm && styles.optionTextActive]}>ながす</Text>
             {bgm ? <Text style={styles.check}>✓</Text> : null}
           </Pressable>
           <Pressable
@@ -146,7 +163,7 @@ export default function OtonaScreen({ onBack }: Props) {
             accessibilityState={{ selected: !bgm }}
             style={[styles.option, !bgm ? styles.optionActive : styles.optionIdle]}
           >
-            <Text style={[styles.optionText, !bgm && styles.optionTextActive]}>ながさない</Text>
+            <Text style={[styles.optionText, optionFont, !bgm && styles.optionTextActive]}>ながさない</Text>
             {!bgm ? <Text style={styles.check}>✓</Text> : null}
           </Pressable>
         </View>
@@ -167,7 +184,7 @@ export default function OtonaScreen({ onBack }: Props) {
                 setConfirmReset(false);
               }}
               accessibilityRole="button"
-              style={[styles.resetBtn, styles.resetCancel]}
+              style={[styles.resetBtn, styles.resetBtnGrow, styles.resetCancel]}
             >
               <Text style={styles.resetCancelText}>やめる</Text>
             </Pressable>
@@ -178,7 +195,7 @@ export default function OtonaScreen({ onBack }: Props) {
             disabled={stars === 0 && !confirmReset}
             style={[
               styles.resetBtn,
-              confirmReset ? styles.resetConfirm : styles.resetIdle,
+              confirmReset ? [styles.resetBtnGrow, styles.resetConfirm] : styles.resetIdle,
               stars === 0 && !confirmReset ? styles.resetDisabled : null,
             ]}
           >
@@ -227,7 +244,7 @@ const styles = StyleSheet.create({
   card: {
     backgroundColor: colors.surface,
     borderRadius: radius.md,
-    padding: space.lg,
+    padding: CARD_PAD,
     borderWidth: 1,
     borderColor: colors.stageBorder,
   },
@@ -242,17 +259,16 @@ const styles = StyleSheet.create({
   },
   options: {
     flexDirection: 'row',
-    columnGap: space.md,
+    columnGap: OPTION_GAP,
   },
   option: {
     flex: 1,
     minHeight: 84,
     borderRadius: radius.md,
     borderWidth: 3,
+    paddingHorizontal: OPTION_PAD,
     alignItems: 'center',
     justifyContent: 'center',
-    flexDirection: 'row',
-    columnGap: space.sm,
   },
   optionIdle: {
     backgroundColor: colors.surface,
@@ -262,18 +278,21 @@ const styles = StyleSheet.create({
     backgroundColor: colors.play,
     borderColor: colors.playPressed,
   },
-  optionText: {
-    fontSize: font.big,
-    fontWeight: '900',
-    color: colors.text,
-  },
   optionTextActive: {
     color: colors.white,
   },
   check: {
-    fontSize: font.big,
+    // 選択中の印。文字の横に並べると狭い画面で文字が折り返すので、右上に重ねる。
+    position: 'absolute',
+    top: 2,
+    right: 8,
+    fontSize: font.small,
     color: colors.white,
     fontWeight: '900',
+  },
+  optionText: {
+    fontWeight: '900',
+    color: colors.text,
   },
   note: {
     fontSize: font.small,
@@ -293,9 +312,15 @@ const styles = StyleSheet.create({
     color: colors.text,
   },
   resetRow: {
+    // 確認中は「やめる」「ほんとうに 0に する」が横に入りきらない幅で2段に折り返す（はみ出さない）。
     flexDirection: 'row',
+    flexWrap: 'wrap',
     columnGap: space.sm,
+    rowGap: space.sm,
     marginTop: space.md,
+  },
+  resetBtnGrow: {
+    flexGrow: 1,
   },
   resetBtn: {
     minHeight: 52,

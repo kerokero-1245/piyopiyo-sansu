@@ -2,7 +2,15 @@
 // 隅の歯車を3秒長押しでおとなモードへ（4歳が偶発しにくい親ゲート／DESIGN §6）。
 
 import React, { useRef } from 'react';
-import { Image, ImageSourcePropType, Pressable, StyleSheet, Text, View } from 'react-native';
+import {
+  Image,
+  ImageSourcePropType,
+  Pressable,
+  StyleSheet,
+  Text,
+  useWindowDimensions,
+  View,
+} from 'react-native';
 import { colors, font, space } from '../theme';
 import BigButton from '../components/BigButton';
 import { playSound } from '../audio/sounds';
@@ -16,6 +24,14 @@ interface Props {
 }
 
 const HOLD_MS = 3000;
+
+// 題字を1行に収める文字の大きさ。枠（最大幅 480・左右の余白 space.md）の内側の幅から決める。
+// 実測（Chrome / ヒラギノ）で 44px のとき幅 341px ≒ 7.39×大きさ＋字間16。係数 7.55 で少し余裕を持たせ、
+// 390 幅では従来どおり 44 のまま、360 幅で 40・320 幅で 34 になる。
+function titleFontSize(windowW: number): number {
+  const avail = Math.min(windowW, 480) - space.md * 2;
+  return Math.min(font.huge, Math.floor((avail - 16) / 7.55));
+}
 
 // 概念の絵に使う素材（本編と同じシールポップ画風。assets/svg / problems.ts と同一）。
 const ART_HIYOKO: ImageSourcePropType = require('../../assets/svg/hiyoko.svg');
@@ -42,6 +58,7 @@ function ConceptGroup({ source, count }: { source: ImageSourcePropType; count: n
 
 export default function TitleScreen({ onPlay, onOtona }: Props) {
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const { width: windowW } = useWindowDimensions();
 
   const clearHold = () => {
     if (timer.current) {
@@ -76,7 +93,7 @@ export default function TitleScreen({ onPlay, onOtona }: Props) {
           hitSlop={12}
           testID="title-say"
         >
-          <Text style={styles.title}>ぴよぴよさんすう</Text>
+          <Text style={[styles.title, { fontSize: titleFontSize(windowW) }]}>ぴよぴよさんすう</Text>
         </Pressable>
         <Text style={styles.subtitle}>かぞえて あそぼう</Text>
 
