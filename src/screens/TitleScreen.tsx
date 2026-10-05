@@ -130,6 +130,7 @@ export default function TitleScreen({ onPlay, onOtona }: Props) {
       <Pressable
         onPressIn={startHold}
         onPressOut={clearHold}
+        accessibilityRole="button"
         accessibilityLabel="おとなモード（長押し）"
         hitSlop={12}
         style={styles.gear}

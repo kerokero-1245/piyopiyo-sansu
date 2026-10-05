@@ -5,7 +5,7 @@
 // ⭐の累計は PlayScreen が1問クリアごとに settings へ加算済み。ここでは読むだけ。
 
 import React, { useEffect, useRef, useState } from 'react';
-import { Animated, Easing, Image, StyleSheet, Text, View } from 'react-native';
+import { Animated, Easing, Image, Platform, StyleSheet, Text, View, ViewStyle } from 'react-native';
 import { colors, font, space } from '../theme';
 import BigButton from './BigButton';
 import Confetti from './Confetti';
@@ -15,6 +15,12 @@ import { sayPhrase } from '../audio/voice';
 
 // ⭐ はシールポップ画風の素材（ほし）に差し替え。まだ集めていないスロットは薄く表示する。
 const HOSHI = require('../../assets/svg/hoshi.svg');
+
+// 暗幕は画面全体に敷く。このオーバーレイは最大幅 480 の枠（App.tsx の frame）の内側に置かれるので、
+// absolute のままだと広い画面では枠の中だけが暗くなる。web では position: fixed でビューポート全体を覆う
+// （react-native-web は fixed をそのまま CSS に渡す。RN の型には無いので型だけ合わせる）。
+const BACKDROP_FULL: ViewStyle | null =
+  Platform.OS === 'web' ? ({ position: 'fixed' } as unknown as ViewStyle) : null;
 
 interface Props {
   starCount: number; // このセットで集めた⭐の数（=5）
@@ -104,7 +110,7 @@ export default function ClearOverlay({ starCount, onReplay, onHome }: Props) {
 
   return (
     <View style={styles.root} pointerEvents="box-none">
-      <View style={styles.backdrop} pointerEvents="none" />
+      <View style={[styles.backdrop, BACKDROP_FULL]} pointerEvents="none" />
       {gathered ? <Confetti /> : null}
 
       <Animated.View style={[styles.card, { opacity, transform: [{ scale }] }]}>
