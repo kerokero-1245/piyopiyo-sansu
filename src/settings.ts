@@ -1,6 +1,7 @@
 // 端末内の保存もの（DESIGN §7・§14）。
 // - かずの おおきさ（maxSum）
-// - あつめた ほし の累計（totalStars）… ごほうび（スタンプ）のコレクション
+// - あつめた ほし の累計（totalStars）… ごほうび（スタンプ）のコレクション。街（ぴよぴよランド）の燃料
+// - あつめた ほし を 0 に もどした ときの累計（starsResetAt）… 表示を 0 から数え直すための控え
 // web は localStorage に保存、native はセッション内キャッシュのみ（MVP）。外部送信なし。
 // 取得失敗時は既定値にフォールバック。消えても遊びは壊れない（罰・失敗表示はしない）。
 
@@ -9,6 +10,7 @@ import { Platform } from 'react-native';
 export type MaxSum = 5 | 10 | 20;
 const KEY = 'sansu.maxSum';
 const STAR_KEY = 'sansu.totalStars';
+const STAR_RESET_AT_KEY = 'sansu.starsResetAt';
 const TTS_KEY = 'sansu.tts';
 const BGM_KEY = 'sansu.bgm';
 const DEFAULT: MaxSum = 5;
@@ -61,7 +63,8 @@ export function setMaxSum(v: MaxSum): void {
 
 // ── あつめた ほし（累計スタンプ）───────────────────────────────
 // 1問クリアごとに +1 する“ごほうび”の合計。減ることはない（マイナス要素ゼロ）。
-// リセットはおとなモードからのみ。数字スコアではなく「集めた⭐の数」を貯める。
+// おとなモードの「0に もどす」でも減らさない（表示だけ 0 に もどす。下の resetShownStars）。
+// 数字スコアではなく「集めた⭐の数」を貯める。
 let starCache: number | null = null;
 
 export function getTotalStars(): number {
@@ -96,15 +99,47 @@ export function addStars(n = 1): number {
   return next;
 }
 
-// 累計を0に戻す（おとなモード専用）。
-export function resetStars(): void {
-  starCache = 0;
+// ── 「あつめた ほし」の表示（おとなモードの 0に もどす）─────────────────
+// sansu.totalStars は街（ぴよぴよランド）が読む燃料なので、0 に もどしても【意図的に残す】
+// （街の ⭐ を減らさない。WORLD.md §3.3「⭐は絶対に減らない」、おつかいめいろの resetProgress と同じ方針）。
+// 0 に もどすのは さんすうの中の表示だけ: もどした時点の累計を sansu.starsResetAt に控え、
+// 表示は「累計 − 控え」にする。控えが累計より大きい（累計だけ消えた等）ときは控えを無視する。
+let resetAtCache: number | null = null;
+
+function getStarsResetAt(): number {
+  if (resetAtCache !== null) return resetAtCache;
   const store = ls();
   if (store) {
     try {
-      store.setItem(STAR_KEY, '0');
+      const v = store.getItem(STAR_RESET_AT_KEY);
+      if (v != null) {
+        const n = parseInt(v, 10);
+        if (Number.isFinite(n) && n >= 0) return (resetAtCache = n);
+      }
     } catch {
-      // 無視
+      // 無視して既定（0）へ
+    }
+  }
+  return (resetAtCache = 0);
+}
+
+// おとなモード・がんばりカードに出す「あつめた ほし」の数。
+export function getShownStars(): number {
+  const total = getTotalStars();
+  const at = getStarsResetAt();
+  return at <= total ? total - at : total;
+}
+
+// 「あつめた ほし」の表示を 0 に もどす（おとなモード専用）。累計 sansu.totalStars は変えない。
+export function resetShownStars(): void {
+  const total = getTotalStars();
+  resetAtCache = total;
+  const store = ls();
+  if (store) {
+    try {
+      store.setItem(STAR_RESET_AT_KEY, String(total));
+    } catch {
+      // 無視（同じ起動中はキャッシュで 0 表示を保つ）
     }
   }
 }

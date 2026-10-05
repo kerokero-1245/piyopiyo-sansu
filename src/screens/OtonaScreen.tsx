@@ -3,6 +3,7 @@
 // 変更は次のもんだいから反映される（PlayScreen がマウント時に設定を読む）。
 // 項目が増えても背の低い画面で「もどる」が隠れないよう、内容は ScrollView に入れる（DESIGN §8）。
 // 選択肢の文字は枠の幅から大きさを決め、✓ は文字の横ではなく右上に重ねて、狭い画面でも1行に収める。
+// 「0に もどす」は さんすうの中の表示だけを 0 にする。街へ渡す累計 sansu.totalStars は残す（settings.ts）。
 
 import React, { useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
@@ -11,10 +12,10 @@ import BigButton from '../components/BigButton';
 import {
   getBgmOn,
   getMaxSum,
-  getTotalStars,
+  getShownStars,
   getTtsOn,
   MaxSum,
-  resetStars,
+  resetShownStars,
   setBgmOn,
   setMaxSum,
   setTtsOn,
@@ -44,7 +45,7 @@ export default function OtonaScreen({ onBack }: Props) {
   const { width: windowW } = useWindowDimensions();
   const optionFont = { fontSize: optionFontSize(windowW) };
   const [maxSum, setMax] = useState<MaxSum>(getMaxSum());
-  const [stars, setStars] = useState<number>(getTotalStars());
+  const [stars, setStars] = useState<number>(getShownStars());
   const [tts, setTts] = useState<boolean>(getTtsOn()); // よみあげ する/しない
   const [bgm, setBgm] = useState<boolean>(getBgmOn()); // BGM ながす/ながさない
   const [confirmReset, setConfirmReset] = useState(false); // 誤操作防止の2段階確認
@@ -75,7 +76,7 @@ export default function OtonaScreen({ onBack }: Props) {
       setConfirmReset(true); // 1回目は確認へ
       return;
     }
-    resetStars();
+    resetShownStars(); // 表示だけ 0 に。街へ渡す累計（sansu.totalStars）は残す
     setStars(0);
     setConfirmReset(false);
   };
@@ -205,7 +206,7 @@ export default function OtonaScreen({ onBack }: Props) {
           </Pressable>
         </View>
         <Text style={styles.note}>
-          あつめた ほし は へりません。ここでだけ 0に もどせます。
+          あつめた ほし は へりません。ここでだけ 0に もどせます。0に しても、まち（ぴよぴよランド）の ⭐ は へりません。
         </Text>
         </View>
 

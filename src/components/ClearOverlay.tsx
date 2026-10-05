@@ -2,14 +2,14 @@
 // できたね!画面を進化させ、集めた⭐を1つずつ順に出す（数え上げのトーン）→ 5つ揃って祝福。
 // その下に「あつめた ほし ⭐×N」（累計）を控えめに表示。スコアも罰も出さない（DESIGN §4）。
 //
-// ⭐の累計は PlayScreen が1問クリアごとに settings へ加算済み。ここでは読むだけ。
+// ⭐の累計は PlayScreen が1問クリアごとに settings へ加算済み。ここでは読むだけ（表示は getShownStars）。
 
 import React, { useEffect, useRef, useState } from 'react';
 import { Animated, Easing, Image, Platform, StyleSheet, Text, View, ViewStyle } from 'react-native';
 import { colors, font, space } from '../theme';
 import BigButton from './BigButton';
 import Confetti from './Confetti';
-import { getTotalStars, getTtsOn } from '../settings';
+import { getShownStars, getTtsOn } from '../settings';
 import { playCountTone, playSound } from '../audio/sounds';
 import { sayPhrase } from '../audio/voice';
 
@@ -61,8 +61,8 @@ function CardStar({ filled }: { filled: boolean }) {
 }
 
 export default function ClearOverlay({ starCount, onReplay, onHome }: Props) {
-  // 累計は既に加算済み。マウント時に一度だけ読む。
-  const total = useRef(getTotalStars()).current;
+  // 累計は既に加算済み。マウント時に一度だけ読む（おとなモードで 0 に もどした後は、そこからの数）。
+  const total = useRef(getShownStars()).current;
 
   const [shown, setShown] = useState(0); // いくつ⭐が現れたか（0..starCount）
   const [gathered, setGathered] = useState(false); // 5つ揃った（祝福）

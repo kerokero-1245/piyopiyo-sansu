@@ -1,17 +1,19 @@
 // タイトル画面。文字ゼロでも進める大ボタン「あそぶ」＋概念の絵（ふえる/へる）。
 // 隅の歯車を3秒長押しでおとなモードへ（4歳が偶発しにくい親ゲート／DESIGN §6）。
+// 左上の「まちへ もどる」で ぴよぴよランド（街）へ帰る。あそんでいる途中の画面には置かない。
 
 import React, { useRef } from 'react';
 import {
   Image,
   ImageSourcePropType,
+  Platform,
   Pressable,
   StyleSheet,
   Text,
   useWindowDimensions,
   View,
 } from 'react-native';
-import { colors, font, space } from '../theme';
+import { colors, font, radius, space } from '../theme';
 import BigButton from '../components/BigButton';
 import { playSound } from '../audio/sounds';
 import { sayPhrase, warmUpVoice } from '../audio/voice';
@@ -24,6 +26,16 @@ interface Props {
 }
 
 const HOLD_MS = 3000;
+
+// 街（ぴよぴよランド）は同じオリジンのルート https://kerokero-1245.github.io/ にある。
+// さんすうは /piyopiyo-sansu/ で配っているので、同じオリジンの "/" へ移れば街に戻る。
+// 街は web にしか無いので、ボタンも web のときだけ出す。
+const TOWN_URL = '/';
+const SHOW_TOWN = Platform.OS === 'web';
+function goTown() {
+  const loc = (globalThis as unknown as { location?: { assign(url: string): void } }).location;
+  loc?.assign(TOWN_URL);
+}
 
 // 題字を1行に収める文字の大きさ。枠（最大幅 480・左右の余白 space.md）の内側の幅から決める。
 // 実測（Chrome / ヒラギノ）で 44px のとき幅 341px ≒ 7.39×大きさ＋字間16。係数 7.55 で少し余裕を持たせ、
@@ -126,6 +138,21 @@ export default function TitleScreen({ onPlay, onOtona }: Props) {
         </View>
       </View>
 
+      {/* 街へ戻る（タイトルにだけ置く）。 */}
+      {SHOW_TOWN ? (
+        <Pressable
+          onPress={() => {
+            playSound('tap');
+            goTown();
+          }}
+          accessibilityRole="link"
+          accessibilityLabel="まちへ もどる"
+          style={({ pressed }) => [styles.town, pressed && styles.townPressed]}
+        >
+          <Text style={styles.townText}>まちへ もどる</Text>
+        </Pressable>
+      ) : null}
+
       {/* 親ゲート: 3秒長押しでおとなモード */}
       <Pressable
         onPressIn={startHold}
@@ -185,6 +212,27 @@ const styles = StyleSheet.create({
     width: '100%',
     maxWidth: 320,
     marginTop: space.xl,
+  },
+  town: {
+    position: 'absolute',
+    left: 0,
+    top: 0,
+    minHeight: 44,
+    paddingHorizontal: space.sm + 2,
+    borderRadius: radius.pill,
+    backgroundColor: colors.surface,
+    borderWidth: 2,
+    borderColor: colors.stageBorder,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  townPressed: {
+    backgroundColor: colors.choicePressed,
+  },
+  townText: {
+    fontSize: 18,
+    fontWeight: '800',
+    color: colors.text,
   },
   gear: {
     position: 'absolute',
