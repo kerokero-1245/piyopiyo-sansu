@@ -257,21 +257,26 @@ export default function PlayScreen({ onHome }: Props) {
         ))}
       </View>
 
-      {/* テスト用（不可視）: いまの局面と問題データ。持ち越し・出題順・アニメ完了を実測する足場。 */}
-      <Text testID="phase" style={styles.hidden}>
-        {phase}
-      </Text>
-      <Text testID="step-info" style={styles.hidden}>
-        {JSON.stringify({
-          i: index,
-          before: step.before,
-          answer: step.answer,
-          op: step.op,
-          emoji: story.char.emoji,
-          initial: story.initialCount,
-          maxCount: story.maxCount,
-        })}
-      </Text>
+      {/* テスト用（不可視）: いまの局面と問題データ。持ち越し・出題順・アニメ完了を実測する足場。
+          答えを含むので開発時（__DEV__）だけ出し、書き出した本番の DOM には残さない。 */}
+      {__DEV__ ? (
+        <>
+          <Text testID="phase" style={styles.hidden}>
+            {phase}
+          </Text>
+          <Text testID="step-info" style={styles.hidden}>
+            {JSON.stringify({
+              i: index,
+              before: step.before,
+              answer: step.answer,
+              op: step.op,
+              emoji: story.char.emoji,
+              initial: story.initialCount,
+              maxCount: story.maxCount,
+            })}
+          </Text>
+        </>
+      ) : null}
 
       {celebrating ? <Confetti /> : null}
       {done ? <ClearOverlay starCount={SET_SIZE} onReplay={newGame} onHome={onHome} /> : null}

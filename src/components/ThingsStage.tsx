@@ -329,10 +329,13 @@ const ThingsStage = forwardRef<ThingsStageHandle, Props>(function ThingsStage(
         })}
       </View>
 
-      {/* テスト用: いま画面に居るモノの数（不可視）。増減の経過・持ち越しを実測する足場。 */}
-      <Text testID="present-count" style={styles.hidden} pointerEvents="none">
-        {presentCount}
-      </Text>
+      {/* テスト用: いま画面に居るモノの数（不可視）。増減の経過・持ち越しを実測する足場。
+          回答待ちのあいだは答えと同じ数になるので、開発時（__DEV__）だけ出す。 */}
+      {__DEV__ ? (
+        <Text testID="present-count" style={styles.hidden} pointerEvents="none">
+          {presentCount}
+        </Text>
+      ) : null}
     </View>
   );
 });
