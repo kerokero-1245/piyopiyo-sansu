@@ -217,7 +217,7 @@ web は `localStorage`、native は将来 AsyncStorage。取得失敗時は既�
 
 ### 開発環境メモ
 
-- Node は **v20（.nvmrc: 20.20.0）**。CI（Actions）も Node 20。
+- Node は **v22（.nvmrc: 22.23.3）**。CI（Actions）も Node 22。
 - リポジトリ名は `piyopiyo-sansu`。
 
 ---
@@ -272,7 +272,7 @@ web は `localStorage`、native は将来 AsyncStorage。取得失敗時は既�
 
 ## 12. 準備が必要なもの（作り手側）
 
-- Node v20（`.nvmrc` 20.20.0）。
+- Node v22（`.nvmrc` 22.23.3）。
 - GitHub リポジトリ（Pages 有効・Actions デプロイ）。
 - 姪っ子が使う端末（iPhone/iPad 等）— URL を開いてホーム画面に追加。
 - （フェーズ2）おじの声の録音「せいかい!」「すごいね!」等。
