@@ -16,7 +16,7 @@
 
 ## 状態
 
-**フェーズ1（MVP）実装済み・Webファースト。** タイトル → もんだい（たしざん・ひきざんを混ぜて5問）→ できたね! まで遊べる。問題はシード無しのランダム生成（合計≤5・答え1〜5）。おとなモードで 10まで / 20まで（2桁のたし・ひき）に拡張できる。効果音は Web Audio 合成、増減アニメは React Native 標準 `Animated`、キャラは絵文字プレースホルダ。
+**フェーズ1（MVP）実装済み・Webファースト。** タイトル → もんだい（たしざん・ひきざんを混ぜて5問）→ できたね! まで遊べる。問題はシード無しのランダム生成（合計≤5・答え1〜5）。おとなモードで 10まで / 20まで（2桁のたし・ひき）に拡張できる。効果音は Web Audio 合成、増減アニメは React Native 標準 `Animated`、キャラ（モノ）はシールポップ画風の自作 SVG（`assets/svg/`）。
 
 配布は **Webファースト**: Expo の web ビルドを URL で配布し、ブラウザで開いて「ホーム画面に追加」すれば全画面で遊べる。ネイティブアプリは同じコードから後日。詳細は [DESIGN.md §0](docs/DESIGN.md)。
 
@@ -31,7 +31,7 @@
 - 対象: 4歳（未就学・ひらがなは読み始め）。育てたいのは**数唱**と**1対1対応**。
 - 数字の暗記・計算ではなく「モノを見て数える」体験に徹する。
 - 罰・タイマー・スコア・ゲームオーバーなし。まちがいは「正しい数え方をもう一度見る」入口。
-- 既存キャラIP（アンパンマン等）は使わない。MVPは絵文字プレースホルダ。
+- 既存キャラIP（アンパンマン等）は使わない。キャラ（モノ）は自作 SVG のシールポップ素材（piyo-assets から同梱）。
 - 完全オフライン: バックエンド・アカウント・通信・外部送信なし。設定は端末内のみ。
 - 技術: Expo SDK 57 (React Native + TypeScript)、Node 22.23.3、アニメは標準 `Animated`。
 
@@ -47,7 +47,7 @@ npm start            # Expo を起動 → ターミナルで w を押すと Web 
 - `w` … ブラウザで開く（Webファースト。まずはこれ）
 - `i` / `a` … iOS シミュレータ / Android エミュレータ（任意）
 
-ショートカット: `npm run web`（`w` を押さず直接 Web 起動）。
+ショートカット: `npm run web`（`w` を押さず直接 Web 起動）。型の確認は `npm run typecheck`（`tsc --noEmit`）。
 
 ### Web ビルド（配布用の静的サイト書き出し）
 
@@ -61,10 +61,15 @@ GitHub Pages はサブパス（`/piyopiyo-sansu/`）配信のため、CI では 
 EXPO_BASE_URL=/piyopiyo-sansu npx expo export --platform web
 ```
 
+公開 HTML の型は [public/index.html](public/index.html)（`lang="ja"`・説明文・OGP・manifest へのリンク・読み込み中の背景色）。`public/` のほかのファイル（`manifest.webmanifest`・`icon-192.png`・`icon-512.png`・`apple-touch-icon.png`・OGP 画像 `og.png`）は書き出しにそのままコピーされる。アイコン類（`public/` と `assets/` の PNG）は、街のケーキやさんと同じ自作 SVG（piyo-assets の `cake.svg`）から作った。
+
 ### 遊び方（フェーズ1）
 
-タイトルの「あそぶ」→ もんだい画面。モノが増える／減えるのを見て「ぜんぶで／のこりは いくつ?」に3つの巨大ボタン（●●●＋数字）で答える。正解すると1つずつ数え上げ、まちがえるとボタンがぷるぷる震えて正しい数え方をゆっくり見せる（罰なし）。5問おわると「できたね!」。
+タイトルの「あそぶ」→ もんだい画面。モノが増える／減るのを見て「ぜんぶで／のこりは いくつ?」に3つの巨大ボタン（●●●＋数字）で答える。正解すると1つずつ数え上げ、まちがえるとボタンがぷるぷる震えて正しい数え方をゆっくり見せる（罰なし）。5問おわると「できたね!」。
 ※ タイトル右下の歯車を **3秒長押し** すると、おとなモード（かずの範囲を 5まで／10まで／20まで で切替）に入る。
+※ タイトル左上の「まちへ もどる」で ぴよぴよランド（同じオリジンの `/`）へ戻る（Web のみ。もんだい・がんばりカード・おとなモードには置かない）。
+
+**あつめた ほし（⭐）**: 1問クリアごとに累計 `sansu.totalStars` が1つ増え、街（ぴよぴよランド）がこれを燃料として読む。おとなモードの「0に もどす」は、さんすうの中の「あつめた ほし」の表示だけを 0 から数え直す（もどした時点の累計を `sansu.starsResetAt` に控える）。**街へ渡す累計 `sansu.totalStars` は減らさない。**
 
 ## 画面・ファイル構成
 
@@ -72,13 +77,14 @@ EXPO_BASE_URL=/piyopiyo-sansu npx expo export --platform web
 App.tsx                     文字ヘッダ無しの最小ステートルーター（title→play→otona）
 src/
   theme.ts                  配色・フォント・余白の基準値（4歳向け）
-  types.ts                  Op / Problem / CharDef / Route など
-  settings.ts               かずの範囲 maxSum（5/10/20）・よみあげ on/off・BGM on/off・累計⭐の保存（web は localStorage）
+  types.ts                  Op / CharDef / Step / StorySet / Route
+  settings.ts               かずの範囲 maxSum（5/10/20）・よみあげ on/off・BGM on/off・累計⭐（街へ渡す）と表示を 0 に もどした控えの保存（web は localStorage）
   game/problems.ts          問題生成（generateStorySet のつづきもの連鎖 / makeChoices の選択肢生成）
+  game/grid.ts              モノの並び（gridPlan）と、大きさの見積もり（sizingPlan・現れうる最大列数）
   audio/sounds.ts           効果音（web は Web Audio 合成、native は無音スタブ）。BGM と AudioContext を共有
   audio/voice.ts            よみあげの入口。3段構え（①同梱クリップ→②speechSynthesis→③無音）に解決。声の再生中は BGM をダッキング
   audio/clips.ts            ①同梱クリップ（VOICEVOX 事前生成）を鳴らす（tier1）
-  audio/voiceClips.ts       同梱クリップの登録表（現状 p_seikai のみ。require で登録）
+  audio/voiceClips.ts       同梱クリップの登録表（7個。require で登録）
   audio/speech.ts           ②ブラウザ内蔵 speechSynthesis（ja-JP）で読む（tier2）
   audio/bgm.ts              BGM の入口（さんすう用の薄いラッパ。開始/トグルを engine へ）
   audio/bgm/engine.ts       ぴよぴよランド共通BGMエンジン（オルゴール風・Web Audio 手続き生成ループ）
@@ -87,12 +93,14 @@ src/
     BigButton.tsx           共通の大ボタン
     ChoiceButton.tsx        選択肢の巨大ボタン（●●●＋数字）
     ThingsStage.tsx         モノの増減アニメ＋数え上げ（Animated）
+    ProgressStar.tsx        進捗ドット（クリアすると⭐に変わる）
     Confetti.tsx            紙吹雪
-    ClearOverlay.tsx        「できたね!」セット完了の祝福
+    ClearOverlay.tsx        5問おわったときの「きょうの がんばりカード」（⭐・できたね!・あつめた ほし）
   screens/
-    TitleScreen.tsx         タイトル（あそぶ / 親ゲート）
+    TitleScreen.tsx         タイトル（あそぶ / まちへ もどる / 親ゲート）
     PlayScreen.tsx          もんだい本体（増減→数える→3択→次へ）
-    OtonaScreen.tsx         おとなモード（5まで / 10まで / 20まで の切替・よみあげ する/しない・BGM ながす/ながさない）
+    OtonaScreen.tsx         おとなモード（5まで / 10まで / 20まで の切替・よみあげ する/しない・BGM ながす/ながさない・あつめた ほし の表示と 0に もどす）
+public/                     Web 書き出しの HTML の型・manifest・アイコン・OGP 画像
 ```
 
 ## よみあげ（音声）
@@ -101,8 +109,8 @@ src/
 
 3段構えで解決する（[audio/voice.ts](src/audio/voice.ts)）:
 
-1. **同梱クリップ（tier1）** … VOICEVOX 事前生成の `.m4a`。現状は「せいかい！」（`p_seikai`）のみ同梱。最優先で再生。
-2. **speechSynthesis（tier2）** … ブラウザ内蔵の日本語合成音声（ja-JP）。クリップ未同梱の語（タイトル・おしい／あれれ・ぜんぶできたね）はここで読む。
+1. **同梱クリップ（tier1）** … VOICEVOX 事前生成の `.m4a`。定型句7個（せいかい／タイトル／おしい／あれれ／ぜんぶできたね／きたよ／かえったよ）をすべて同梱（[assets/voice/README.md](assets/voice/README.md)）。最優先で再生。
+2. **speechSynthesis（tier2）** … ブラウザ内蔵の日本語合成音声（ja-JP）。クリップを再生できない環境や、登録の無い語はここで読む。
 3. **無音（tier3）** … どちらも使えない環境では黙る。**絵とアニメだけでゲームは完全に成立する**（読み上げは「あると嬉しい」補助）。
 
 必ずユーザー操作起点で鳴らし（ブラウザの自動再生制限）、どの段でもクラッシュしない。外部送信ゼロ（同梱クリップは端末内アセット・合成は端末内）。後で VOICEVOX クリップを `assets/voice/` に足して `voiceClips.ts` に `require` を1行加えれば、同じ呼び出しのまま tier1 に上がる（呼び出し側の変更は不要）。
