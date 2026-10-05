@@ -30,14 +30,15 @@ export function gridPlan(n: number): GridPlan {
 }
 
 // モノ1辺を決めるための「サイズ決めグリッド」。
-// 列数は n が増えると単調に増えない（例: 13個=3行×5列 の方が 16個=4行×4列 より列が多い）。
-// セット中に現れるどの数 n（1..maxCount）でも横にはみ出さないよう、幅の見積もりには
-// 「現れうる最大列数」を使う。高さは行数が単調増加なので rows(maxCount) で足りる。
-// ただし maxCount≤10（5まで/10まで）は従来の gridPlan(maxCount) と同一のサイズを保つ
-// （既存の見た目を1pxも変えない）。maxCount≥11（20まで）のみ最大列数へ広げる。
+// 列数は n が増えると単調に増えない（例: 5個=1行×5列 の方が 6個=2行×3列 より列が多い／
+// 13個=3行×5列 の方が 16個=4行×4列 より列が多い）。セット中に現れるどの数 n（1..maxCount）でも
+// 横にはみ出さないよう、幅の見積もりには「現れうる最大列数」を使う。高さは行数が単調増加なので
+// rows(maxCount) で足りる。
+// 以前は maxCount≤10 だけ gridPlan(maxCount) をそのまま使っていたため、10まで で maxCount が 6〜8 の
+// お話に 4〜5 個の段が出ると、横幅を 3〜4 列ぶんで見積もったモノが 5 列並んでステージ外に切れていた。
+// maxCount≤5（5まで）は gridPlan(maxCount) と同じ結果になるので見た目は変わらない。
 export function sizingPlan(maxCount: number): GridPlan {
   const base = gridPlan(maxCount);
-  if (maxCount <= 10) return base;
   let cols = base.cols;
   for (let n = 1; n <= maxCount; n++) cols = Math.max(cols, gridPlan(n).cols);
   return { cols, rows: base.rows };

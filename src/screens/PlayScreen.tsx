@@ -37,13 +37,15 @@ const SEIKAI_LEAD_MS = 600;
 // 配置は gridPlan(n)、サイズ見積もりは sizingPlan(maxCount)（現れうる最大列数で幅を確保）。
 
 // 実測した残り領域に、maxCount 個が収まるモノの1辺を求める（セット中は不変）。
+// 下限は「収まること」を優先して小さく取る。以前の下限 40 は、背の低い画面（320x568 の 20まで で
+// 4段）で4段ぶんの高さが足りず下の段がステージ外へ切れる原因になっていた。
 function computeThingSize(w: number, h: number, renderCount: number): number {
   const { cols, rows } = sizingPlan(renderCount);
   const usableW = Math.max(w - space.md * 2, 80);
   const usableH = Math.max(h - BADGE_RESERVE - space.md, 80);
   const byW = (usableW - (cols - 1) * GAP) / cols;
   const byH = (usableH - (rows - 1) * GAP) / rows;
-  return Math.max(40, Math.min(byW, byH, 132));
+  return Math.max(12, Math.min(byW, byH, 132));
 }
 
 export default function PlayScreen({ onHome }: Props) {
