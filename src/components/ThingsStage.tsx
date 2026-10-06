@@ -287,16 +287,22 @@ const ThingsStage = forwardRef<ThingsStageHandle, Props>(function ThingsStage(
         ) : null}
       </View>
 
-      {/* モノ（絶対配置＋translate）。可視領域内に中央そろえ。 */}
+      {/* モノ（絶対配置＋translate）。可視領域内に中央そろえ。
+          スロットは maxCount 個あるが、いま居ないモノ（i ≥ presentCount）は読み上げの対象から外す
+          （見えないモノを読み上げると数がずれる）。増減の途中は始めの数のまま、終わったら答えの数になる。 */}
       <View style={StyleSheet.absoluteFill} pointerEvents="none">
         {enterRef.current.map((e, i) => {
           const scaleEnter = e.interpolate({ inputRange: [0, 1], outputRange: [0.3, 1] });
           const popScale = pop[i].interpolate({ inputRange: [0, 1], outputRange: [1, 1.16] });
           const scale = Animated.multiply(scaleEnter, popScale);
           const imgSize = size * OBJ_SCALE;
+          const a11yHidden = i >= presentCount;
           return (
             <Animated.View
               key={i}
+              aria-hidden={a11yHidden}
+              accessibilityElementsHidden={a11yHidden}
+              importantForAccessibility={a11yHidden ? 'no-hide-descendants' : 'auto'}
               style={[
                 styles.slot,
                 {
@@ -330,7 +336,8 @@ const ThingsStage = forwardRef<ThingsStageHandle, Props>(function ThingsStage(
       </View>
 
       {/* テスト用: いま画面に居るモノの数（不可視）。増減の経過・持ち越しを実測する足場。
-          回答待ちのあいだは答えと同じ数になるので、開発時（__DEV__）だけ出す。 */}
+          回答待ちのあいだは答えと同じ数になるので、開発時（__DEV__）だけ出す。
+          presentCount そのものは本番でも、見えないスロットを読み上げから外すのに使う。 */}
       {__DEV__ ? (
         <Text testID="present-count" style={styles.hidden} pointerEvents="none">
           {presentCount}
