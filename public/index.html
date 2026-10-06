@@ -4,12 +4,12 @@
   head の終わりに favicon、body の終わりに JS を差し込む（置き換えは文字列の最初の一致なので、
   このコメントに置き場所の記号や終了タグをそのまま書かないこと）。public/ のほかのファイルは書き出しにそのままコピーされる。
   href は相対パスで書く（GitHub Pages では /piyopiyo-sansu/ の下、手元の開発サーバでは / の下で配るため）。
-  og:image だけは SNS が読むので絶対 URL。
+  og:url と og:image は SNS が読むので絶対 URL。Expo が差し込む favicon と JS は書き出し時のベースパス
+  （EXPO_BASE_URL）から始まる。
 -->
 <html lang="ja">
   <head>
     <meta charset="utf-8" />
-    <meta httpEquiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
     <title>%WEB_TITLE%</title>
     <meta name="description" content="4さいの たしざん・ひきざん。ふえたり へったり する モノを みて かぞえよう。" />
