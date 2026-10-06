@@ -15,11 +15,15 @@ interface Props {
   // これを固定しないと、問題ごとに選択肢ボタンの高さが変わり → ステージが伸び縮みし →
   // モノの大きさと置き場所がズレて、下の段が切れる（DESIGN §8「可視領域を絶対にはみ出さない」）。
   reserveRows?: number;
+  // 背の低い横向き（PlayScreen の左右レイアウト）で縦に3つ積むときの形。ドットと数字を横に並べ、
+  // 親の高さを3等分して埋める（縦持ちの形・大きさは変えない）。
+  compact?: boolean;
 }
 
 const DOT = 13; // ドット1つの直径（styles.dot と一致させる）
 const DOT_GAP = 5; // 行間（styles.dots の rowGap と一致させる）
 const DOTS_MIN_H = 34; // 1〜2行のときの従来の下限（5まで/10まで の見た目を1pxも変えない）
+const DOTS_ROW_W = 5 * DOT + 4 * 5; // 5個並んだ1行の幅（compact で数字の位置をそろえる）
 
 // value 個のドットを最大5個/行で並べる。
 function dotRows(value: number): number[][] {
@@ -37,7 +41,14 @@ function dotsHeight(rows: number): number {
   return Math.max(DOTS_MIN_H, n * DOT + (n - 1) * DOT_GAP);
 }
 
-export default function ChoiceButton({ value, onPress, disabled, shakeNonce = 0, reserveRows = 1 }: Props) {
+export default function ChoiceButton({
+  value,
+  onPress,
+  disabled,
+  shakeNonce = 0,
+  reserveRows = 1,
+  compact = false,
+}: Props) {
   const shake = useRef(new Animated.Value(0)).current;
   const prevNonce = useRef(0);
 
@@ -66,11 +77,12 @@ export default function ChoiceButton({ value, onPress, disabled, shakeNonce = 0,
         accessibilityLabel={`${value}`}
         style={({ pressed }) => [
           styles.card,
+          compact && styles.cardCompact,
           { backgroundColor: pressed ? colors.choicePressed : colors.choice },
           disabled && styles.disabled,
         ]}
       >
-        <View style={[styles.dots, { minHeight: dotsHeight(reserveRows) }]}>
+        <View style={[styles.dots, { minHeight: dotsHeight(reserveRows) }, compact && styles.dotsCompact]}>
           {dotRows(value).map((row, r) => (
             <View key={r} style={styles.dotRow}>
               {row.map((k) => (
@@ -105,6 +117,15 @@ const styles = StyleSheet.create({
     shadowRadius: 5,
     elevation: 3,
   },
+  cardCompact: {
+    flex: 1,
+    minHeight: 0,
+    flexDirection: 'row',
+    paddingVertical: 4,
+    paddingHorizontal: space.sm,
+    columnGap: space.sm,
+    rowGap: 0,
+  },
   disabled: {
     opacity: 0.55,
   },
@@ -114,6 +135,9 @@ const styles = StyleSheet.create({
     rowGap: DOT_GAP,
     // 実際の下限は reserveRows から算出して上書きする（dotsHeight）。
     minHeight: DOTS_MIN_H,
+  },
+  dotsCompact: {
+    width: DOTS_ROW_W,
   },
   dotRow: {
     flexDirection: 'row',

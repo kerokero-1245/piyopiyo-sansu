@@ -29,17 +29,19 @@ export function gridPlan(n: number): GridPlan {
   return { cols, rows };
 }
 
-// モノ1辺を決めるための「サイズ決めグリッド」。
+// モノ1辺を決めるための「サイズ決めグリッド」。counts は このお話で画面に並ぶ数の一覧
+// （initialCount と各問の answer。増減の途中も並びは before / answer のどちらかなので、これで全部）。
 // 列数は n が増えると単調に増えない（例: 5個=1行×5列 の方が 6個=2行×3列 より列が多い／
-// 13個=3行×5列 の方が 16個=4行×4列 より列が多い）。セット中に現れるどの数 n（1..maxCount）でも
-// 横にはみ出さないよう、幅の見積もりには「現れうる最大列数」を使う。高さは行数が単調増加なので
-// rows(maxCount) で足りる。
-// 以前は maxCount≤10 だけ gridPlan(maxCount) をそのまま使っていたため、10まで で maxCount が 6〜8 の
-// お話に 4〜5 個の段が出ると、横幅を 3〜4 列ぶんで見積もったモノが 5 列並んでステージ外に切れていた。
-// maxCount≤5（5まで）は gridPlan(maxCount) と同じ結果になるので見た目は変わらない。
-export function sizingPlan(maxCount: number): GridPlan {
-  const base = gridPlan(maxCount);
-  let cols = base.cols;
-  for (let n = 1; n <= maxCount; n++) cols = Math.max(cols, gridPlan(n).cols);
-  return { cols, rows: base.rows };
+// 13個=3行×5列 の方が 16個=4行×4列 より列が多い）。お話に出るどの数でも横にはみ出さないよう、
+// 幅の見積もりには「お話に出る数の列数の最大」を使う。高さは行数が単調増加なので最大数の行数で足りる。
+// 以前は 1..maxCount のすべての数で見積もっていたため、お話に出ない数（例: 8 までのお話で一度も出ない 5）の
+// 列数まで取って、必要のない場面でも絵が縮んでいた。
+export function sizingPlan(counts: readonly number[]): GridPlan {
+  let maxN = 0;
+  let cols = 1;
+  for (const n of counts) {
+    if (n > maxN) maxN = n;
+    cols = Math.max(cols, gridPlan(n).cols);
+  }
+  return { cols, rows: gridPlan(maxN).rows };
 }
