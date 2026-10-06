@@ -31,14 +31,17 @@ const CARD_PAD = space.md; // カードの内側の余白
 const OPTION_GAP = space.sm; // 選択肢どうしの間
 const OPTION_PAD = 4; // 選択肢の内側の左右の余白
 
-// 3つ並びの選択肢（「10まで」が いちばん長い ≒ 3.1字ぶん）が1行に収まる文字の大きさ。
+// 3つ並びの選択肢（いちばん長い「10まで」= 4字）が1行に収まる文字の大きさ。
+// 1字 = 1em で見積もる（保守的）。Mac のヒラギノの UI 用書体はかなが約 0.92em と狭いが、
+// かなが全角（1em）の書体（Android の Noto Sans CJK JP など）でも折り返さないよう、狭い方には寄せない。
 // 枠（最大幅 480・左右 space.md）→ カード（枠線1・余白 CARD_PAD）→ 選択肢（枠線3・余白 OPTION_PAD）の内側の幅から決める。
-// 2つ並びの最長「ながさない」（≒4.6字）は、2つ並びの方が幅が広いのでこの大きさで収まる。
+// 2つ並びの最長「ながさない」（5字）は、2つ並びの内側の幅が3つ並びの 1.5 倍以上あるのでこの大きさで収まる。
+const OPTION_EM = 4;
 function optionFontSize(windowW: number): number {
   const frameW = Math.min(windowW, 480) - space.md * 2;
   const cardInner = frameW - CARD_PAD * 2 - 2;
   const optionInner = (cardInner - OPTION_GAP * 2) / 3 - 3 * 2 - OPTION_PAD * 2;
-  return Math.min(font.big, Math.floor(optionInner / 3.3));
+  return Math.min(font.big, Math.floor(optionInner / OPTION_EM));
 }
 
 export default function OtonaScreen({ onBack }: Props) {
