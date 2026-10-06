@@ -66,10 +66,10 @@ EXPO_BASE_URL=/piyopiyo-sansu npx expo export --platform web
 ### 遊び方（フェーズ1）
 
 タイトルの「あそぶ」→ もんだい画面。モノが増える／減るのを見て「ぜんぶで／のこりは いくつ?」に3つの巨大ボタン（●●●＋数字）で答える。正解すると1つずつ数え上げ、まちがえるとボタンがぷるぷる震えて正しい数え方をゆっくり見せる（罰なし）。5問おわると「できたね!」。
-※ タイトル右下の歯車を **3秒長押し** すると、おとなモード（かずの範囲を 5まで／10まで／20まで で切替）に入る。
+※ タイトル右下（横向きのスマホでは右上）の歯車を **3秒長押し**（キーボードでは Enter / Space の長押し）すると、おとなモード（かずの範囲を 5まで／10まで／20まで で切替）に入る。
 ※ タイトル左上の「まちへ もどる」で ぴよぴよランド（同じオリジンの `/`）へ戻る（Web のみ。もんだい・がんばりカード・おとなモードには置かない）。
 
-**あつめた ほし（⭐）**: 1問クリアごとに累計 `sansu.totalStars` が1つ増え、街（ぴよぴよランド）がこれを燃料として読む。おとなモードの「0に もどす」は、さんすうの中の「あつめた ほし」の表示だけを 0 から数え直す（もどした時点の累計を `sansu.starsResetAt` に控える）。**街へ渡す累計 `sansu.totalStars` は減らさない。**
+**あつめた ほし（⭐）**: 1問クリアごとに累計 `sansu.totalStars` が1つ増え、街（ぴよぴよランド）がこれを燃料として読む。おとなモードの「0に もどす」は、さんすうの中の「あつめた ほし」の表示だけを 0 から数え直す（もどした時点の累計を `sansu.starsResetAt` に控え、表示＝累計−控え。控えが累計より大きいと分かった時点で控えは捨てる＝表示は累計そのまま）。**街へ渡す累計 `sansu.totalStars` は減らさない。**
 
 ## 画面・ファイル構成
 
@@ -80,7 +80,8 @@ src/
   types.ts                  Op / CharDef / Step / StorySet / Route
   settings.ts               かずの範囲 maxSum（5/10/20）・よみあげ on/off・BGM on/off・累計⭐（街へ渡す）と表示を 0 に もどした控えの保存（web は localStorage）
   game/problems.ts          問題生成（generateStorySet のつづきもの連鎖 / makeChoices の選択肢生成）
-  game/grid.ts              モノの並び（gridPlan）と、大きさの見積もり（sizingPlan・現れうる最大列数）
+  game/grid.ts              モノの並び（gridPlan）と、大きさの見積もり（sizingPlan・お話に出る数の最大列数）
+  layout.ts                 背の低い横向き（スマホの横持ち）の判定と枠の最大幅
   audio/sounds.ts           効果音（web は Web Audio 合成、native は無音スタブ）。BGM と AudioContext を共有
   audio/voice.ts            よみあげの入口。3段構え（①同梱クリップ→②speechSynthesis→③無音）に解決。声の再生中は BGM をダッキング
   audio/clips.ts            ①同梱クリップ（VOICEVOX 事前生成）を鳴らす（tier1）
@@ -96,6 +97,7 @@ src/
     ProgressStar.tsx        進捗ドット（クリアすると⭐に変わる）
     Confetti.tsx            紙吹雪
     ClearOverlay.tsx        5問おわったときの「きょうの がんばりカード」（⭐・できたね!・あつめた ほし）
+    TownLink.tsx            「まちへ もどる」（街の木の絵つき・href="/" のリンク。Web のみ）
   screens/
     TitleScreen.tsx         タイトル（あそぶ / まちへ もどる / 親ゲート）
     PlayScreen.tsx          もんだい本体（増減→数える→3択→次へ）
