@@ -3,15 +3,33 @@
 // その下に「あつめた ほし ⭐×N」（累計）を控えめに表示。スコアも罰も出さない（DESIGN §4）。
 //
 // ⭐の累計は PlayScreen が1問クリアごとに settings へ加算済み。ここでは読むだけ（表示は getShownStars）。
+//
+// 中身（カード＋ボタン）はスクロールできる入れ物に入れる。背の低い横向き（568x320 など）では
+// 縦に積むと「おうちへ」が画面の下に切れていたので、スクロールで必ず届くようにする。
+// 背の低い横向きで幅が足りるとき（844x390・896x414 など）は、カードとボタンを左右に並べてスクロールなしで収める。
+// 入れ物は枠（App.tsx の frame）の上下の余白まで広げ、中身の中心は従来と同じ位置（枠の内側の中央）に置く。
+// 従来は中身が高いとき（320x568）に上下の余白へはみ出して中央に置かれていたので、その見た目のまま収まる。
 
 import React, { useEffect, useRef, useState } from 'react';
-import { Animated, Easing, Image, Platform, StyleSheet, Text, View, ViewStyle } from 'react-native';
+import {
+  Animated,
+  Easing,
+  Image,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  Text,
+  useWindowDimensions,
+  View,
+  ViewStyle,
+} from 'react-native';
 import { colors, font, space } from '../theme';
 import BigButton from './BigButton';
 import Confetti from './Confetti';
 import { getShownStars, getTtsOn } from '../settings';
 import { playCountTone, playSound } from '../audio/sounds';
 import { sayPhrase } from '../audio/voice';
+import { FRAME_PAD_BOTTOM, FRAME_PAD_COMPACT, FRAME_PAD_TOP, isCompactLandscape } from '../layout';
 
 // ⭐ はシールポップ画風の素材（ほし）に差し替え。まだ集めていないスロットは薄く表示する。
 const HOSHI = require('../../assets/svg/hoshi.svg');
@@ -21,6 +39,14 @@ const HOSHI = require('../../assets/svg/hoshi.svg');
 // （react-native-web は fixed をそのまま CSS に渡す。RN の型には無いので型だけ合わせる）。
 const BACKDROP_FULL: ViewStyle | null =
   Platform.OS === 'web' ? ({ position: 'fixed' } as unknown as ViewStyle) : null;
+
+// 左右に並べるのに要る幅（カードの最大幅 380 ＋ 間 ＋ ボタンの列 ＋ 左右の余白）。
+const CARD_MAX_W = 380;
+const SIDE_BUTTONS_W = 280;
+const SIDE_GAP = space.lg;
+const SIDE_MIN_W = CARD_MAX_W + SIDE_GAP + SIDE_BUTTONS_W + space.md * 2;
+// スクロールの入れ物の上下の端と中身の間（最小）。
+const SCROLL_EDGE = 2;
 
 interface Props {
   starCount: number; // このセットで集めた⭐の数（=5）
@@ -63,6 +89,17 @@ function CardStar({ filled }: { filled: boolean }) {
 export default function ClearOverlay({ starCount, onReplay, onHome }: Props) {
   // 累計は既に加算済み。マウント時に一度だけ読む（おとなモードで 0 に もどした後は、そこからの数）。
   const total = useRef(getShownStars()).current;
+
+  // 背の低い横向きで幅が足りるときだけ左右に並べる（中身の入れ物の実測幅で決める）。
+  const { width: windowW, height: windowH } = useWindowDimensions();
+  const [boxW, setBoxW] = useState(0);
+  const compact = isCompactLandscape(windowW, windowH);
+  const sideBySide = compact && boxW >= SIDE_MIN_W;
+  // 入れ物を枠の上下の余白まで広げ、中身の中心が従来（枠の内側の中央）と同じになるよう上下の余白を決める。
+  const padTop = compact ? FRAME_PAD_COMPACT : FRAME_PAD_TOP;
+  const padBottom = compact ? FRAME_PAD_COMPACT : FRAME_PAD_BOTTOM;
+  const scrollBox = { top: -padTop, bottom: -padBottom };
+  const contentPad = { paddingTop: padTop - padBottom + SCROLL_EDGE, paddingBottom: SCROLL_EDGE };
 
   const [shown, setShown] = useState(0); // いくつ⭐が現れたか（0..starCount）
   const [gathered, setGathered] = useState(false); // 5つ揃った（祝福）
@@ -113,38 +150,47 @@ export default function ClearOverlay({ starCount, onReplay, onHome }: Props) {
       <View style={[styles.backdrop, BACKDROP_FULL]} pointerEvents="none" />
       {gathered ? <Confetti /> : null}
 
-      <Animated.View style={[styles.card, { opacity, transform: [{ scale }] }]}>
-        <Text style={styles.title}>きょうの がんばりカード</Text>
+      <ScrollView
+        style={[styles.scroll, scrollBox]}
+        contentContainerStyle={[styles.content, contentPad, sideBySide && styles.contentSide]}
+        showsVerticalScrollIndicator={false}
+        onLayout={(e) => setBoxW(e.nativeEvent.layout.width)}
+      >
+        <Animated.View
+          style={[styles.card, sideBySide && styles.cardSide, { opacity, transform: [{ scale }] }]}
+        >
+          <Text style={styles.title}>きょうの がんばりカード</Text>
 
-        <View style={styles.stars}>
-          {Array.from({ length: starCount }, (_, i) => (
-            <CardStar key={i} filled={i < shown} />
-          ))}
+          <View style={styles.stars}>
+            {Array.from({ length: starCount }, (_, i) => (
+              <CardStar key={i} filled={i < shown} />
+            ))}
+          </View>
+
+          {/* 5つ揃ったら「できたね!」。揃うまでは高さを確保して見た目が跳ねないようにする。 */}
+          <View style={styles.doneSlot}>
+            {gathered ? <Text style={styles.doneText}>ぜんぶ できたね!</Text> : null}
+          </View>
+
+          {/* 累計コレクション（控えめ・数字スコアではなく“集めた⭐の数”） */}
+          <View style={styles.totalRow}>
+            <Text style={styles.total}>あつめた ほし </Text>
+            <Image source={HOSHI} resizeMode="contain" style={styles.totalStar} />
+            <Text style={styles.total}> × {total}</Text>
+          </View>
+        </Animated.View>
+
+        <View style={[styles.buttons, sideBySide && styles.buttonsSide]}>
+          <BigButton
+            emoji="🔁"
+            label="もういちど"
+            onPress={onReplay}
+            color={colors.play}
+            pressedColor={colors.playPressed}
+          />
+          <BigButton emoji="🏠" label="おうちへ" onPress={onHome} />
         </View>
-
-        {/* 5つ揃ったら「できたね!」。揃うまでは高さを確保して見た目が跳ねないようにする。 */}
-        <View style={styles.doneSlot}>
-          {gathered ? <Text style={styles.doneText}>ぜんぶ できたね!</Text> : null}
-        </View>
-
-        {/* 累計コレクション（控えめ・数字スコアではなく“集めた⭐の数”） */}
-        <View style={styles.totalRow}>
-          <Text style={styles.total}>あつめた ほし </Text>
-          <Image source={HOSHI} resizeMode="contain" style={styles.totalStar} />
-          <Text style={styles.total}> × {total}</Text>
-        </View>
-      </Animated.View>
-
-      <View style={styles.buttons}>
-        <BigButton
-          emoji="🔁"
-          label="もういちど"
-          onPress={onReplay}
-          color={colors.play}
-          pressedColor={colors.playPressed}
-        />
-        <BigButton emoji="🏠" label="おうちへ" onPress={onHome} />
-      </View>
+      </ScrollView>
     </View>
   );
 }
@@ -156,9 +202,23 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
+  },
+  // 上下は枠の余白まで広げる（top / bottom は描画時に与える）。
+  scroll: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+  },
+  // 中央寄せ（左右の余白 space.md は従来の root と同じ）。高さが足りないときはスクロールで届く。
+  content: {
+    flexGrow: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    padding: space.md,
+    paddingHorizontal: space.md,
+  },
+  contentSide: {
+    flexDirection: 'row',
+    columnGap: SIDE_GAP,
   },
   backdrop: {
     position: 'absolute',
@@ -175,7 +235,7 @@ const styles = StyleSheet.create({
     paddingVertical: space.md,
     paddingHorizontal: space.md,
     marginBottom: space.lg,
-    maxWidth: 380,
+    maxWidth: CARD_MAX_W,
     width: '100%',
     borderWidth: 4,
     borderColor: colors.white,
@@ -239,9 +299,16 @@ const styles = StyleSheet.create({
     width: 18,
     height: 18,
   },
+  cardSide: {
+    width: CARD_MAX_W,
+    marginBottom: 0,
+  },
   buttons: {
     width: '100%',
     maxWidth: 360,
     rowGap: space.sm,
+  },
+  buttonsSide: {
+    width: SIDE_BUTTONS_W,
   },
 });
