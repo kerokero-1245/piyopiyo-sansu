@@ -86,7 +86,10 @@ export function getTotalStars(): number {
 }
 
 // n 個の⭐を加える（既定1）。新しい累計を返す。
+// 加える前に控え（sansu.starsResetAt）が今の累計より大きくないかを確かめる（下の discardStaleResetAt）。
+// おとなモードもがんばりカードも開かずに遊んだときでも、累計が控えを越えた時点で表示が減って見えないようにするため。
 export function addStars(n = 1): number {
+  discardStaleResetAt();
   const next = getTotalStars() + Math.max(0, n);
   starCache = next;
   const store = ls();
@@ -106,7 +109,8 @@ export function addStars(n = 1): number {
 // 0 に もどすのは さんすうの中の表示だけ: もどした時点の累計を sansu.starsResetAt に控え、
 // 表示は「累計 − 控え」にする。控えが累計より大きい（累計だけ消えた・書き換えられた等）と分かったら、
 // その控えは捨てる（キーを消し、0 として扱う＝控えの無い旧データと同じ表示「累計そのまま」）。
-// 捨てずに無視するだけだと、累計が控えを越えた時点で表示が「累計 − 控え」に切り替わって減って見えていた。
+// 捨てずに無視するだけだと、累計が控えを越えた時点で表示が「累計 − 控え」に切り替わって減って見えていた
+// （例: 累計 7・控え 9 → 表示 7、1セット後に累計 12 → 表示 3）。ぴよぴよことばと同じ扱い。
 let resetAtCache: number | null = null;
 
 function getStarsResetAt(): number {
@@ -139,15 +143,15 @@ function discardStarsResetAt(): void {
   }
 }
 
+// 控えが今の累計より大きければ捨てる。
+function discardStaleResetAt(): void {
+  if (getStarsResetAt() > getTotalStars()) discardStarsResetAt();
+}
+
 // おとなモード・がんばりカードに出す「あつめた ほし」の数。
 export function getShownStars(): number {
-  const total = getTotalStars();
-  const at = getStarsResetAt();
-  if (at > total) {
-    discardStarsResetAt();
-    return total;
-  }
-  return total - at;
+  discardStaleResetAt();
+  return getTotalStars() - getStarsResetAt();
 }
 
 // 「あつめた ほし」の表示を 0 に もどす（おとなモード専用）。累計 sansu.totalStars は変えない。
