@@ -10,6 +10,8 @@
 // レイアウトの約束（おつかいめいろの教訓 / DESIGN §8）:
 //   モノの1辺 size は「このお話で出る最大数 maxCount」に合わせて親が実測領域から算出して渡す。
 //   セット中は size を変えない（持ち越したモノがガタつかない）。どの数でも可視領域に必ず収まる。
+//   画面の回転などでステージの寸法・size が変わったときは、いま居るモノを新しい寸法の位置へ置き直す
+//   （増減アニメ中なら、アニメが終わったときに最新の寸法で置き直す）。
 
 import React, { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react';
 import { Animated, Easing, StyleSheet, Text, View } from 'react-native';
@@ -115,8 +117,40 @@ const ThingsStage = forwardRef<ThingsStageHandle, Props>(function ThingsStage(
     return out;
   };
 
+  // 登場・増減のアニメ中か（中は置き直さない）。アニメ中に寸法が変わったら、終わったときに置き直す。
+  const animatingRef = useRef(false);
+  const relayoutPendingRef = useRef(false);
+  // いま居るモノ（present 個）を、最新の寸法での中央そろえ位置へ瞬時に置き直す。
+  const relayoutPresent = () => {
+    relayoutPendingRef.current = false;
+    const n = presentRef.current;
+    const pos = positionsFor(n);
+    for (let i = 0; i < n; i++) {
+      posX[i].setValue(pos[i].x);
+      posY[i].setValue(pos[i].y);
+    }
+  };
+  const finishAnim = () => {
+    animatingRef.current = false;
+    if (relayoutPendingRef.current) relayoutPresent();
+  };
+
+  // 回答待ちの途中で画面を回転するなど、ステージの寸法やモノの大きさが変わったら置き直す
+  // （置き直さないと回転前の位置に残り、ステージからはみ出して見える数が答えと合わなくなる）。
+  const prevDimsRef = useRef({ stageW, stageH, size, gap });
+  useEffect(() => {
+    const p = prevDimsRef.current;
+    if (p.stageW === stageW && p.stageH === stageH && p.size === size && p.gap === gap) return;
+    prevDimsRef.current = { stageW, stageH, size, gap };
+    if (animatingRef.current) relayoutPendingRef.current = true;
+    else relayoutPresent();
+    // 寸法の変化だけで走らせる。
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [stageW, stageH, size, gap]);
+
   // 最初のグループがぽんっと登場する（1つずつ・軽い間）。終わったら onDone。
   const runIntro = (onDone: () => void) => {
+    animatingRef.current = true;
     const pos = positionsFor(initialCount);
     for (let i = 0; i < initialCount; i++) {
       posX[i].setValue(pos[i].x);
@@ -132,6 +166,7 @@ const ThingsStage = forwardRef<ThingsStageHandle, Props>(function ThingsStage(
     }
     later(() => {
       setPresent(initialCount);
+      finishAnim();
       onDone();
     }, initialCount * stepMs + 280);
   };
@@ -146,6 +181,7 @@ const ThingsStage = forwardRef<ThingsStageHandle, Props>(function ThingsStage(
     speak: boolean,
     onDone: () => void
   ) => {
+    animatingRef.current = true;
     pop.forEach((v) => v.setValue(0));
     setCount(null);
     setPresent(before); // 開始時＝前問の答え（持ち越し）をマーカーに出す
@@ -203,6 +239,7 @@ const ThingsStage = forwardRef<ThingsStageHandle, Props>(function ThingsStage(
     const total = startDelay + Math.max(1, changing.length) * stepMs + (slow ? 420 : 340);
     later(() => {
       setPresent(answer);
+      finishAnim(); // アニメ中に寸法が変わっていたら、最新の寸法で置き直す
       onDone();
     }, total);
   };
