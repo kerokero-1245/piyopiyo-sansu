@@ -12,6 +12,8 @@
 
 ブラウザで開いてそのまま遊べる。スマホなら「ホーム画面に追加」で全画面起動。`main` に push すると GitHub Actions（[.github/workflows/deploy.yml](.github/workflows/deploy.yml)）が Web を書き出して自動デプロイする。
 
+typecheck（`npm run typecheck`）と Web の書き出しが通ったときだけ公開し、PR でも同じ検査を回す。
+
 - 設計（コンセプト・画面・問題生成ロジック・4歳UX・ロードマップ）: [docs/DESIGN.md](docs/DESIGN.md)
 
 ## 状態
