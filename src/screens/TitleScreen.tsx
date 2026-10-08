@@ -214,7 +214,7 @@ const styles = StyleSheet.create({
     fontSize: font.huge,
     fontWeight: '900',
     color: colors.text,
-    letterSpacing: 2,
+    letterSpacing: TITLE_LETTER_SPACING,
   },
   subtitle: {
     fontSize: font.body,
