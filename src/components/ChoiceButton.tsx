@@ -2,9 +2,16 @@
 // 数字が読めなくても“数”で選べるようにする（DESIGN §1・§4）。
 // まちがえて押されたときは shakeNonce が変わり、ぷるぷる震える（罰ではない合図）。
 
-import React, { useEffect, useRef } from 'react';
-import { Animated, Easing, Pressable, StyleSheet, Text, View } from 'react-native';
-import { colors, font, radius, space } from '../theme';
+import React, { useEffect, useRef } from "react";
+import {
+  Animated,
+  Easing,
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
+import { colors, font, radius, space } from "../theme";
 
 interface Props {
   value: number;
@@ -30,7 +37,9 @@ function dotRows(value: number): number[][] {
   const perRow = 5;
   const rows: number[][] = [];
   for (let i = 0; i < value; i += perRow) {
-    rows.push(Array.from({ length: Math.min(perRow, value - i) }, (_, k) => i + k));
+    rows.push(
+      Array.from({ length: Math.min(perRow, value - i) }, (_, k) => i + k),
+    );
   }
   return rows;
 }
@@ -57,16 +66,44 @@ export default function ChoiceButton({
       prevNonce.current = shakeNonce;
       shake.setValue(0);
       Animated.sequence([
-        Animated.timing(shake, { toValue: 1, duration: 60, easing: Easing.linear, useNativeDriver: false }),
-        Animated.timing(shake, { toValue: -1, duration: 90, easing: Easing.linear, useNativeDriver: false }),
-        Animated.timing(shake, { toValue: 1, duration: 90, easing: Easing.linear, useNativeDriver: false }),
-        Animated.timing(shake, { toValue: -1, duration: 90, easing: Easing.linear, useNativeDriver: false }),
-        Animated.timing(shake, { toValue: 0, duration: 60, easing: Easing.linear, useNativeDriver: false }),
+        Animated.timing(shake, {
+          toValue: 1,
+          duration: 60,
+          easing: Easing.linear,
+          useNativeDriver: false,
+        }),
+        Animated.timing(shake, {
+          toValue: -1,
+          duration: 90,
+          easing: Easing.linear,
+          useNativeDriver: false,
+        }),
+        Animated.timing(shake, {
+          toValue: 1,
+          duration: 90,
+          easing: Easing.linear,
+          useNativeDriver: false,
+        }),
+        Animated.timing(shake, {
+          toValue: -1,
+          duration: 90,
+          easing: Easing.linear,
+          useNativeDriver: false,
+        }),
+        Animated.timing(shake, {
+          toValue: 0,
+          duration: 60,
+          easing: Easing.linear,
+          useNativeDriver: false,
+        }),
       ]).start();
     }
   }, [shakeNonce, shake]);
 
-  const translateX = shake.interpolate({ inputRange: [-1, 1], outputRange: [-8, 8] });
+  const translateX = shake.interpolate({
+    inputRange: [-1, 1],
+    outputRange: [-8, 8],
+  });
 
   return (
     <Animated.View style={[styles.outer, { transform: [{ translateX }] }]}>
@@ -82,7 +119,13 @@ export default function ChoiceButton({
           disabled && styles.disabled,
         ]}
       >
-        <View style={[styles.dots, { minHeight: dotsHeight(reserveRows) }, compact && styles.dotsCompact]}>
+        <View
+          style={[
+            styles.dots,
+            { minHeight: dotsHeight(reserveRows) },
+            compact && styles.dotsCompact,
+          ]}
+        >
           {dotRows(value).map((row, r) => (
             <View key={r} style={styles.dotRow}>
               {row.map((k) => (
@@ -108,10 +151,10 @@ const styles = StyleSheet.create({
     borderColor: colors.choiceBorder,
     paddingVertical: space.sm,
     paddingHorizontal: space.xs,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     rowGap: space.xs,
-    shadowColor: '#00000040',
+    shadowColor: "#00000040",
     shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 0.16,
     shadowRadius: 5,
@@ -120,7 +163,7 @@ const styles = StyleSheet.create({
   cardCompact: {
     flex: 1,
     minHeight: 0,
-    flexDirection: 'row',
+    flexDirection: "row",
     paddingVertical: 4,
     paddingHorizontal: space.sm,
     columnGap: space.sm,
@@ -130,8 +173,8 @@ const styles = StyleSheet.create({
     opacity: 0.55,
   },
   dots: {
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     rowGap: DOT_GAP,
     // 実際の下限は reserveRows から算出して上書きする（dotsHeight）。
     minHeight: DOTS_MIN_H,
@@ -140,7 +183,7 @@ const styles = StyleSheet.create({
     width: DOTS_ROW_W,
   },
   dotRow: {
-    flexDirection: 'row',
+    flexDirection: "row",
     columnGap: 5,
   },
   dot: {
@@ -153,7 +196,7 @@ const styles = StyleSheet.create({
   },
   numeral: {
     fontSize: font.huge,
-    fontWeight: '900',
+    fontWeight: "900",
     color: colors.text,
     lineHeight: font.huge + 2,
   },

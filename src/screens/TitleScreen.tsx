@@ -8,7 +8,7 @@
 // 背の低い横向き（src/layout.ts の isCompactLandscape）では、「あそぶ」がスクロールせずに見えるよう縦を詰める:
 // 概念の絵2組を横1列に、余白を小さく、歯車は「まちへ もどる」の行の右端へ（Tab の順は変えない）。
 
-import React, { useRef } from 'react';
+import React, { useRef } from "react";
 import {
   Image,
   ImageSourcePropType,
@@ -18,15 +18,15 @@ import {
   Text,
   useWindowDimensions,
   View,
-} from 'react-native';
-import { colors, font, space } from '../theme';
-import BigButton from '../components/BigButton';
-import TownLink, { SHOW_TOWN, TOWN_LINK_HEIGHT } from '../components/TownLink';
-import { playSound } from '../audio/sounds';
-import { sayPhrase, warmUpVoice } from '../audio/voice';
-import { startSansuBgm } from '../audio/bgm';
-import { getTtsOn } from '../settings';
-import { FRAME_MAX_W, isCompactLandscape } from '../layout';
+} from "react-native";
+import { colors, font, space } from "../theme";
+import BigButton from "../components/BigButton";
+import TownLink, { SHOW_TOWN, TOWN_LINK_HEIGHT } from "../components/TownLink";
+import { playSound } from "../audio/sounds";
+import { sayPhrase, warmUpVoice } from "../audio/voice";
+import { startSansuBgm } from "../audio/bgm";
+import { getTtsOn } from "../settings";
+import { FRAME_MAX_W, isCompactLandscape } from "../layout";
 
 interface Props {
   onPlay: () => void;
@@ -46,17 +46,23 @@ function titleFontSize(windowW: number): number {
   const avail = Math.min(windowW, FRAME_MAX_W) - TITLE_EDGE * 2;
   return Math.min(
     font.huge,
-    Math.floor((avail - TITLE_LETTER_SPACING * TITLE_CHARS) / TITLE_CHARS)
+    Math.floor((avail - TITLE_LETTER_SPACING * TITLE_CHARS) / TITLE_CHARS),
   );
 }
 
 // 概念の絵に使う素材（本編と同じシールポップ画風。assets/svg / problems.ts と同一）。
-const ART_HIYOKO: ImageSourcePropType = require('../../assets/svg/hiyoko.svg');
-const ART_RINGO: ImageSourcePropType = require('../../assets/svg/ringo.svg');
+const ART_HIYOKO: ImageSourcePropType = require("../../assets/svg/hiyoko.svg");
+const ART_RINGO: ImageSourcePropType = require("../../assets/svg/ringo.svg");
 
 // 素材を count 個、絵文字と同じ横並びで描く（記号 ➕/➖ の左右に置く1グループ）。
 // 素材SVGは viewBox 内に余白が焼き込まれているので、絵文字と同等の存在感になる一辺で中央に並べる。
-function ConceptGroup({ source, count }: { source: ImageSourcePropType; count: number }) {
+function ConceptGroup({
+  source,
+  count,
+}: {
+  source: ImageSourcePropType;
+  count: number;
+}) {
   return (
     <View style={styles.conceptGroup}>
       {Array.from({ length: count }, (_, i) => (
@@ -95,10 +101,10 @@ export default function TitleScreen({ onPlay, onOtona }: Props) {
   // タイトルをタップすると「ぴよぴよさんすう」を読み上げる（ジェスチャ起点＝自動再生制限を守る）。
   // 最初のタップでもあるので warmUpVoice() で読み上げをアンロックしてから読む。読み上げオフなら黙る。
   const sayTitle = () => {
-    playSound('tap');
+    playSound("tap");
     warmUpVoice();
     startSansuBgm(); // 最初のタップでBGMを開始（同一曲の再呼び出しは冪等）。読み上げオフでもBGMは鳴る
-    sayPhrase('title', { enabled: getTtsOn() });
+    sayPhrase("title", { enabled: getTtsOn() });
   };
 
   return (
@@ -111,7 +117,7 @@ export default function TitleScreen({ onPlay, onOtona }: Props) {
         {/* 街へ戻る（タイトルにだけ置く）。上に専用の行を取り、題字以下はその下に流す。 */}
         {SHOW_TOWN ? (
           <View style={styles.townRow}>
-            <TownLink onPress={() => playSound('tap')} />
+            <TownLink onPress={() => playSound("tap")} />
           </View>
         ) : null}
 
@@ -125,13 +131,21 @@ export default function TitleScreen({ onPlay, onOtona }: Props) {
               hitSlop={12}
               testID="title-say"
             >
-              <Text style={[styles.title, { fontSize: titleFontSize(windowW) }]}>ぴよぴよさんすう</Text>
+              <Text
+                style={[styles.title, { fontSize: titleFontSize(windowW) }]}
+              >
+                ぴよぴよさんすう
+              </Text>
             </Pressable>
           </View>
-          <Text style={[styles.subtitle, compact && styles.subtitleCompact]}>かぞえて あそぼう</Text>
+          <Text style={[styles.subtitle, compact && styles.subtitleCompact]}>
+            かぞえて あそぼう
+          </Text>
 
           {/* 概念の絵: ふえる（ひよこ2＋1）/ へる（りんご3−1）。本編と同じシールポップ素材で描く。 */}
-          <View style={[styles.conceptBlock, compact && styles.conceptBlockRow]}>
+          <View
+            style={[styles.conceptBlock, compact && styles.conceptBlockRow]}
+          >
             <View style={styles.concept}>
               <ConceptGroup source={ART_HIYOKO} count={2} />
               <Text style={styles.conceptSign}>➕</Text>
@@ -152,7 +166,7 @@ export default function TitleScreen({ onPlay, onOtona }: Props) {
               color={colors.play}
               pressedColor={colors.playPressed}
               onPress={() => {
-                playSound('tap');
+                playSound("tap");
                 warmUpVoice(); // 最初のタップで読み上げ（クリップ＋TTS）をアンロック
                 startSansuBgm(); // 同じジェスチャ内でBGM開始（自動再生制限を守る／冪等）
                 onPlay();
@@ -197,28 +211,28 @@ const styles = StyleSheet.create({
   townRow: {
     height: TOWN_LINK_HEIGHT,
     marginBottom: space.sm,
-    flexDirection: 'row',
-    alignItems: 'flex-start',
+    flexDirection: "row",
+    alignItems: "flex-start",
   },
   center: {
     flexGrow: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
   },
   titleRow: {
-    alignSelf: 'stretch',
+    alignSelf: "stretch",
     marginHorizontal: -space.md,
-    alignItems: 'center',
+    alignItems: "center",
   },
   title: {
     fontSize: font.huge,
-    fontWeight: '900',
+    fontWeight: "900",
     color: colors.text,
     letterSpacing: TITLE_LETTER_SPACING,
   },
   subtitle: {
     fontSize: font.body,
-    fontWeight: '700',
+    fontWeight: "700",
     color: colors.subtext,
     marginTop: space.xs,
     marginBottom: space.lg,
@@ -227,20 +241,20 @@ const styles = StyleSheet.create({
     marginBottom: space.sm,
   },
   conceptBlock: {
-    alignItems: 'center',
+    alignItems: "center",
   },
   conceptBlockRow: {
-    flexDirection: 'row',
+    flexDirection: "row",
     columnGap: space.lg,
   },
   concept: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     marginVertical: space.xs,
   },
   conceptGroup: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
   },
   conceptImg: {
     // 旧・絵文字（fontSize 34）と同等の存在感になる一辺。素材の焼き込み余白ぶん少しだけ大きめ。
@@ -252,7 +266,7 @@ const styles = StyleSheet.create({
     marginHorizontal: space.sm,
   },
   playWrap: {
-    width: '100%',
+    width: "100%",
     maxWidth: 320,
     marginTop: space.xl,
   },
@@ -261,14 +275,14 @@ const styles = StyleSheet.create({
   },
   // 歯車の行（右下）。歯車の位置は従来（右 space.sm・下 space.sm）と同じ。
   gearRow: {
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
+    flexDirection: "row",
+    justifyContent: "flex-end",
     paddingRight: space.sm,
     paddingBottom: space.sm,
   },
   // 背の低い横向き: 「まちへ もどる」の行（高さ TOWN_LINK_HEIGHT＋余白）の右端。行の高さに収める。
   gearRowCompact: {
-    position: 'absolute',
+    position: "absolute",
     top: 0,
     right: space.md,
     paddingBottom: 0,

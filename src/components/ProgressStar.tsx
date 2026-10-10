@@ -2,22 +2,22 @@
 // 'star' に切り替わった瞬間だけ「ぽんっ」と小さくポップする（ごほうび獲得の演出）。
 // 数字スコアではなく、集めた⭐が並んでいくのを見せる。マイナス表示は一切なし。
 
-import React, { useEffect, useRef } from 'react';
-import { Animated, Image, StyleSheet, View } from 'react-native';
-import { colors } from '../theme';
+import React, { useEffect, useRef } from "react";
+import { Animated, Image, StyleSheet, View } from "react-native";
+import { colors } from "../theme";
 
 // クリア済みの⭐はシールポップ画風の素材（ほし）に差し替え。まだの丸ドットはそのまま。
-const HOSHI = require('../../assets/svg/hoshi.svg');
+const HOSHI = require("../../assets/svg/hoshi.svg");
 
-export type StarState = 'off' | 'now' | 'star';
+export type StarState = "off" | "now" | "star";
 
 export default function ProgressStar({ state }: { state: StarState }) {
   // pop: 0=これから出る / 1=定位置。'star' に変わった瞬間に 0→1 でポップさせる。
-  const pop = useRef(new Animated.Value(state === 'star' ? 1 : 0)).current;
+  const pop = useRef(new Animated.Value(state === "star" ? 1 : 0)).current;
   const prev = useRef<StarState>(state);
 
   useEffect(() => {
-    if (state === 'star' && prev.current !== 'star') {
+    if (state === "star" && prev.current !== "star") {
       pop.setValue(0);
       Animated.spring(pop, {
         toValue: 1,
@@ -31,18 +31,29 @@ export default function ProgressStar({ state }: { state: StarState }) {
 
   return (
     <View style={styles.slot}>
-      {state === 'star' ? (
+      {state === "star" ? (
         <Animated.Image
           source={HOSHI}
           resizeMode="contain"
           style={[
             styles.star,
             // spring のオーバーシュートで軽く弾む（extend 補間）。
-            { transform: [{ scale: pop.interpolate({ inputRange: [0, 1], outputRange: [0.2, 1] }) }] },
+            {
+              transform: [
+                {
+                  scale: pop.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: [0.2, 1],
+                  }),
+                },
+              ],
+            },
           ]}
         />
       ) : (
-        <View style={[styles.dot, state === 'now' ? styles.dotNow : styles.dotOff]} />
+        <View
+          style={[styles.dot, state === "now" ? styles.dotNow : styles.dotOff]}
+        />
       )}
     </View>
   );
@@ -53,8 +64,8 @@ const styles = StyleSheet.create({
   slot: {
     width: 26,
     height: 26,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
   },
   star: {
     width: 24,

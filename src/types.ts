@@ -1,7 +1,7 @@
 // アプリ共通の型。DESIGN §7 準拠。座標・盤面は持たない（モノの並びは描画側が数から自動レイアウト）。
 
 // たしざん（ふえる）/ ひきざん（へる）。
-export type Op = 'add' | 'sub';
+export type Op = "add" | "sub";
 
 // 使うキャラ。ask は連濁を含んだ確定文字列（例: 'なんわ' 'なんびき' 'なんこ'）で、
 // 連濁の間違いを避けるため計算せずそのまま表示する。
@@ -10,7 +10,7 @@ export type Op = 'add' | 'sub';
 export interface CharDef {
   emoji: string;
   ask: string;
-  svg: import('react-native').ImageSourcePropType;
+  svg: import("react-native").ImageSourcePropType;
 }
 
 // つづきもの（連鎖出題）の1問＝1つの増減。DESIGN §15。
@@ -33,4 +33,4 @@ export interface StorySet {
 }
 
 // 画面ルート（文字ヘッダの無い最小ステートルーター）。
-export type Route = { name: 'title' } | { name: 'play' } | { name: 'otona' };
+export type Route = { name: "title" } | { name: "play" } | { name: "otona" };

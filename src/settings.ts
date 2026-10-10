@@ -5,14 +5,14 @@
 // web は localStorage に保存、native はセッション内キャッシュのみ（MVP）。外部送信なし。
 // 取得失敗時は既定値にフォールバック。消えても遊びは壊れない（罰・失敗表示はしない）。
 
-import { Platform } from 'react-native';
+import { Platform } from "react-native";
 
 export type MaxSum = 5 | 10 | 20;
-const KEY = 'sansu.maxSum';
-const STAR_KEY = 'sansu.totalStars';
-const STAR_RESET_AT_KEY = 'sansu.starsResetAt';
-const TTS_KEY = 'sansu.tts';
-const BGM_KEY = 'sansu.bgm';
+const KEY = "sansu.maxSum";
+const STAR_KEY = "sansu.totalStars";
+const STAR_RESET_AT_KEY = "sansu.starsResetAt";
+const TTS_KEY = "sansu.tts";
+const BGM_KEY = "sansu.bgm";
 const DEFAULT: MaxSum = 5;
 
 // 型の都合で最小限だけ宣言（DOM lib に依存しない）。
@@ -22,9 +22,10 @@ interface WebStorage {
   removeItem(key: string): void;
 }
 function ls(): WebStorage | null {
-  if (Platform.OS !== 'web') return null;
+  if (Platform.OS !== "web") return null;
   try {
-    const s = (globalThis as unknown as { localStorage?: WebStorage }).localStorage;
+    const s = (globalThis as unknown as { localStorage?: WebStorage })
+      .localStorage;
     return s ?? null;
   } catch {
     return null;
@@ -40,9 +41,9 @@ export function getMaxSum(): MaxSum {
   if (store) {
     try {
       const v = store.getItem(KEY);
-      if (v === '20') return (cache = 20);
-      if (v === '10') return (cache = 10);
-      if (v === '5') return (cache = 5);
+      if (v === "20") return (cache = 20);
+      if (v === "10") return (cache = 10);
+      if (v === "5") return (cache = 5);
     } catch {
       // 無視して既定へ
     }
@@ -179,8 +180,8 @@ export function getTtsOn(): boolean {
   if (store) {
     try {
       const v = store.getItem(TTS_KEY);
-      if (v === 'off') return (ttsCache = false);
-      if (v === 'on') return (ttsCache = true);
+      if (v === "off") return (ttsCache = false);
+      if (v === "on") return (ttsCache = true);
     } catch {
       // 無視して既定へ
     }
@@ -193,7 +194,7 @@ export function setTtsOn(on: boolean): void {
   const store = ls();
   if (store) {
     try {
-      store.setItem(TTS_KEY, on ? 'on' : 'off');
+      store.setItem(TTS_KEY, on ? "on" : "off");
     } catch {
       // 無視
     }
@@ -212,8 +213,8 @@ export function getBgmOn(): boolean {
   if (store) {
     try {
       const v = store.getItem(BGM_KEY);
-      if (v === 'off') return (bgmCache = false);
-      if (v === 'on') return (bgmCache = true);
+      if (v === "off") return (bgmCache = false);
+      if (v === "on") return (bgmCache = true);
     } catch {
       // 無視して既定へ
     }
@@ -226,7 +227,7 @@ export function setBgmOn(on: boolean): void {
   const store = ls();
   if (store) {
     try {
-      store.setItem(BGM_KEY, on ? 'on' : 'off');
+      store.setItem(BGM_KEY, on ? "on" : "off");
     } catch {
       // 無視
     }

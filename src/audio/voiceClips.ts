@@ -16,17 +16,19 @@
 // 存在しないファイルを require するとビルドが壊れるので、クリップを置いてから登録する。
 export const CLIP_URLS: Record<string, string> = {
   // ── 定型句・タイトル・誤答フォロー（VOICEVOX:ずんだもん）──
-  p_seikai: require('../../assets/voice/p_seikai.m4a'), // せいかい！（正解時）
-  t_sansu: require('../../assets/voice/t_sansu.m4a'), // ぴよぴよさんすう（タイトル）
-  e_oshii: require('../../assets/voice/e_oshii.m4a'), // おしい！（誤答フォロー）
-  e_arere: require('../../assets/voice/e_arere.m4a'), // あれれ？（誤答フォロー）
-  p_zenbu: require('../../assets/voice/p_zenbu.m4a'), // ぜんぶ できたね！（がんばりカード）
-  p_kitayo: require('../../assets/voice/p_kitayo.m4a'), // きたよ！（つづきもの・増の合図）
-  p_kaettayo: require('../../assets/voice/p_kaettayo.m4a'), // かえったよ（つづきもの・減の合図）
+  p_seikai: require("../../assets/voice/p_seikai.m4a"), // せいかい！（正解時）
+  t_sansu: require("../../assets/voice/t_sansu.m4a"), // ぴよぴよさんすう（タイトル）
+  e_oshii: require("../../assets/voice/e_oshii.m4a"), // おしい！（誤答フォロー）
+  e_arere: require("../../assets/voice/e_arere.m4a"), // あれれ？（誤答フォロー）
+  p_zenbu: require("../../assets/voice/p_zenbu.m4a"), // ぜんぶ できたね！（がんばりカード）
+  p_kitayo: require("../../assets/voice/p_kitayo.m4a"), // きたよ！（つづきもの・増の合図）
+  p_kaettayo: require("../../assets/voice/p_kaettayo.m4a"), // かえったよ（つづきもの・減の合図）
 };
 
 // 指定した基名のクリップが登録済みか。
 export function hasClip(name: string | undefined): boolean {
   if (!name) return false;
-  return Object.prototype.hasOwnProperty.call(CLIP_URLS, name) && !!CLIP_URLS[name];
+  return (
+    Object.prototype.hasOwnProperty.call(CLIP_URLS, name) && !!CLIP_URLS[name]
+  );
 }

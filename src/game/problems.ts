@@ -7,30 +7,34 @@
 // どちらも answer は 1..maxSum に収まる。選択肢は answer を含む近い数3つをシャッフル。
 // 同じ演算が3連続以上続かない程度の揺らぎを入れ、たし・ひきを混ぜる。
 
-import { CharDef, Op, Step, StorySet } from '../types';
+import { CharDef, Op, Step, StorySet } from "../types";
 
 // キャラ表。ask は連濁を含んだ確定文字列（うさぎ・とりは「わ」、水の生き物・けものは「ひき」、
 // くだもの・まるいものは「こ」）。増やすときは連濁（なんびき等）に注意。
 // svg はシールポップ画風の素材（assets/svg/。INDEX.md 参照）。emoji は控え（音声・意味の記録）。
 const CHARS: CharDef[] = [
-  { emoji: '🐥', ask: 'なんわ', svg: require('../../assets/svg/hiyoko.svg') },
-  { emoji: '🐤', ask: 'なんわ', svg: require('../../assets/svg/piyo.svg') },
-  { emoji: '🐦', ask: 'なんわ', svg: require('../../assets/svg/tori.svg') },
-  { emoji: '🐰', ask: 'なんわ', svg: require('../../assets/svg/usagi.svg') },
-  { emoji: '🐟', ask: 'なんびき', svg: require('../../assets/svg/sakana.svg') },
-  { emoji: '🐠', ask: 'なんびき', svg: require('../../assets/svg/nettaigyo.svg') },
-  { emoji: '🐢', ask: 'なんびき', svg: require('../../assets/svg/kame.svg') },
-  { emoji: '🐶', ask: 'なんびき', svg: require('../../assets/svg/inu.svg') },
-  { emoji: '🐱', ask: 'なんびき', svg: require('../../assets/svg/neko.svg') },
-  { emoji: '🐸', ask: 'なんびき', svg: require('../../assets/svg/kaeru.svg') },
-  { emoji: '🍎', ask: 'なんこ', svg: require('../../assets/svg/ringo.svg') },
-  { emoji: '🍓', ask: 'なんこ', svg: require('../../assets/svg/ichigo.svg') },
-  { emoji: '🍊', ask: 'なんこ', svg: require('../../assets/svg/mikan.svg') },
-  { emoji: '🍋', ask: 'なんこ', svg: require('../../assets/svg/remon.svg') },
-  { emoji: '⭐', ask: 'なんこ', svg: require('../../assets/svg/hoshi.svg') },
-  { emoji: '🎈', ask: 'なんこ', svg: require('../../assets/svg/fuusen.svg') },
-  { emoji: '🍩', ask: 'なんこ', svg: require('../../assets/svg/doonatsu.svg') },
-  { emoji: '🌸', ask: 'なんこ', svg: require('../../assets/svg/sakura.svg') },
+  { emoji: "🐥", ask: "なんわ", svg: require("../../assets/svg/hiyoko.svg") },
+  { emoji: "🐤", ask: "なんわ", svg: require("../../assets/svg/piyo.svg") },
+  { emoji: "🐦", ask: "なんわ", svg: require("../../assets/svg/tori.svg") },
+  { emoji: "🐰", ask: "なんわ", svg: require("../../assets/svg/usagi.svg") },
+  { emoji: "🐟", ask: "なんびき", svg: require("../../assets/svg/sakana.svg") },
+  {
+    emoji: "🐠",
+    ask: "なんびき",
+    svg: require("../../assets/svg/nettaigyo.svg"),
+  },
+  { emoji: "🐢", ask: "なんびき", svg: require("../../assets/svg/kame.svg") },
+  { emoji: "🐶", ask: "なんびき", svg: require("../../assets/svg/inu.svg") },
+  { emoji: "🐱", ask: "なんびき", svg: require("../../assets/svg/neko.svg") },
+  { emoji: "🐸", ask: "なんびき", svg: require("../../assets/svg/kaeru.svg") },
+  { emoji: "🍎", ask: "なんこ", svg: require("../../assets/svg/ringo.svg") },
+  { emoji: "🍓", ask: "なんこ", svg: require("../../assets/svg/ichigo.svg") },
+  { emoji: "🍊", ask: "なんこ", svg: require("../../assets/svg/mikan.svg") },
+  { emoji: "🍋", ask: "なんこ", svg: require("../../assets/svg/remon.svg") },
+  { emoji: "⭐", ask: "なんこ", svg: require("../../assets/svg/hoshi.svg") },
+  { emoji: "🎈", ask: "なんこ", svg: require("../../assets/svg/fuusen.svg") },
+  { emoji: "🍩", ask: "なんこ", svg: require("../../assets/svg/doonatsu.svg") },
+  { emoji: "🌸", ask: "なんこ", svg: require("../../assets/svg/sakura.svg") },
 ];
 
 function randInt(min: number, max: number): number {
@@ -70,7 +74,11 @@ function pickDelta(maxAvail: number, maxSum: number): number {
 
 // 1セット（既定5問）＝ひとつづきのお話を作る。
 // prevChar を渡すと、それと別の種を選ぶ（セットごとに主役が変わる感を出す）。
-export function generateStorySet(maxSum: number, count = 5, prevChar?: CharDef): StorySet {
+export function generateStorySet(
+  maxSum: number,
+  count = 5,
+  prevChar?: CharDef,
+): StorySet {
   // 主役の種を選ぶ（直前セットと別種に）。
   const pool = prevChar ? CHARS.filter((c) => c.svg !== prevChar.svg) : CHARS;
   const char = pool[Math.floor(Math.random() * pool.length)];
@@ -85,7 +93,8 @@ export function generateStorySet(maxSum: number, count = 5, prevChar?: CharDef):
   for (let attempt = 0; ; attempt++) {
     // 最初のグループ数。増減どちらにも動ける中ほどから始める（2..maxSum-1）。
     // 20まで は 7..14 から始める。
-    initialCount = maxSum >= 20 ? randInt(7, 14) : randInt(2, Math.max(2, maxSum - 1));
+    initialCount =
+      maxSum >= 20 ? randInt(7, 14) : randInt(2, Math.max(2, maxSum - 1));
 
     steps = [];
     let before = initialCount;
@@ -100,22 +109,24 @@ export function generateStorySet(maxSum: number, count = 5, prevChar?: CharDef):
       // 候補の演算。直前2問が同じ演算なら、可能なら反対の演算にして3連続を避ける。
       let op: Op;
       const both = canAdd && canSub;
-      const sameStreak = recent.length >= 2 && recent[recent.length - 1] === recent[recent.length - 2];
+      const sameStreak =
+        recent.length >= 2 &&
+        recent[recent.length - 1] === recent[recent.length - 2];
       if (!canAdd) {
-        op = 'sub';
+        op = "sub";
       } else if (!canSub) {
-        op = 'add';
+        op = "add";
       } else if (sameStreak) {
-        op = recent[recent.length - 1] === 'add' ? 'sub' : 'add';
+        op = recent[recent.length - 1] === "add" ? "sub" : "add";
       } else if (both) {
-        op = Math.random() < 0.5 ? 'add' : 'sub';
+        op = Math.random() < 0.5 ? "add" : "sub";
       } else {
-        op = canAdd ? 'add' : 'sub';
+        op = canAdd ? "add" : "sub";
       }
 
       let delta: number;
       let answer: number;
-      if (op === 'add') {
+      if (op === "add") {
         delta = pickDelta(maxSum - before, maxSum);
         answer = before + delta;
       } else {
@@ -123,7 +134,13 @@ export function generateStorySet(maxSum: number, count = 5, prevChar?: CharDef):
         answer = before - delta;
       }
 
-      steps.push({ op, before, delta, answer, choices: makeChoices(answer, maxSum) });
+      steps.push({
+        op,
+        before,
+        delta,
+        answer,
+        choices: makeChoices(answer, maxSum),
+      });
       recent.push(op);
       if (answer > maxCount) maxCount = answer;
       before = answer;

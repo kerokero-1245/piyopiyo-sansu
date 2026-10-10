@@ -5,10 +5,17 @@
 // 選択肢の文字は枠の幅から大きさを決め、✓ は文字の横ではなく右上に重ねて、狭い画面でも1行に収める。
 // 「0に もどす」は さんすうの中の表示だけを 0 にする。街へ渡す累計 sansu.totalStars は残す（settings.ts）。
 
-import React, { useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
-import { colors, font, radius, space } from '../theme';
-import BigButton from '../components/BigButton';
+import React, { useState } from "react";
+import {
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  useWindowDimensions,
+  View,
+} from "react-native";
+import { colors, font, radius, space } from "../theme";
+import BigButton from "../components/BigButton";
 import {
   getBgmOn,
   getMaxSum,
@@ -19,9 +26,9 @@ import {
   setBgmOn,
   setMaxSum,
   setTtsOn,
-} from '../settings';
-import { playSound } from '../audio/sounds';
-import { applyBgmSetting } from '../audio/bgm';
+} from "../settings";
+import { playSound } from "../audio/sounds";
+import { applyBgmSetting } from "../audio/bgm";
 
 interface Props {
   onBack: () => void;
@@ -54,27 +61,27 @@ export default function OtonaScreen({ onBack }: Props) {
   const [confirmReset, setConfirmReset] = useState(false); // 誤操作防止の2段階確認
 
   const choose = (v: MaxSum) => {
-    playSound('tap');
+    playSound("tap");
     setMaxSum(v);
     setMax(v);
   };
 
   const onToggleTts = (on: boolean) => {
-    playSound('tap');
+    playSound("tap");
     setTtsOn(on);
     setTts(on);
   };
 
   // BGM ながす/ながさない。押下＝ユーザー操作なので、ON にしたらその場で再開できる。
   const onToggleBgm = (on: boolean) => {
-    playSound('tap');
+    playSound("tap");
     setBgmOn(on); // localStorage（sansu.bgm）へ永続化
     setBgm(on);
     applyBgmSetting(on); // OFF=即フェード停止 / ON=このジェスチャで即再開
   };
 
   const onResetPress = () => {
-    playSound('tap');
+    playSound("tap");
     if (!confirmReset) {
       setConfirmReset(true); // 1回目は確認へ
       return;
@@ -91,9 +98,20 @@ export default function OtonaScreen({ onBack }: Props) {
         onPress={() => choose(v)}
         accessibilityRole="button"
         accessibilityState={{ selected: active }}
-        style={[styles.option, active ? styles.optionActive : styles.optionIdle]}
+        style={[
+          styles.option,
+          active ? styles.optionActive : styles.optionIdle,
+        ]}
       >
-        <Text style={[styles.optionText, optionFont, active && styles.optionTextActive]}>{label}</Text>
+        <Text
+          style={[
+            styles.optionText,
+            optionFont,
+            active && styles.optionTextActive,
+          ]}
+        >
+          {label}
+        </Text>
         {active ? <Text style={styles.check}>✓</Text> : null}
       </Pressable>
     );
@@ -110,107 +128,164 @@ export default function OtonaScreen({ onBack }: Props) {
 
         <View style={styles.card}>
           <Text style={styles.label}>かずの おおきさ</Text>
-        <View style={styles.options}>
-          <Option v={5} label="5まで" />
-          <Option v={10} label="10まで" />
-          <Option v={20} label="20まで" />
+          <View style={styles.options}>
+            <Option v={5} label="5まで" />
+            <Option v={10} label="10まで" />
+            <Option v={20} label="20まで" />
+          </View>
+          <Text style={styles.note}>
+            4さいは「5まで」がおすすめ。なれてきたら「10まで」「20まで」に。つぎのもんだいからかわります。
+          </Text>
         </View>
-        <Text style={styles.note}>
-          4さいは「5まで」がおすすめ。なれてきたら「10まで」「20まで」に。つぎのもんだいからかわります。
-        </Text>
-      </View>
 
-      {/* よみあげ する/しない（せいかい！・おしい／あれれ・タイトル・がんばりカードの こえ） */}
-      <View style={[styles.card, styles.cardGap]}>
-        <Text style={styles.label}>よみあげ</Text>
-        <View style={styles.options}>
-          <Pressable
-            onPress={() => onToggleTts(true)}
-            accessibilityRole="button"
-            accessibilityState={{ selected: tts }}
-            style={[styles.option, tts ? styles.optionActive : styles.optionIdle]}
-          >
-            <Text style={[styles.optionText, optionFont, tts && styles.optionTextActive]}>する</Text>
-            {tts ? <Text style={styles.check}>✓</Text> : null}
-          </Pressable>
-          <Pressable
-            onPress={() => onToggleTts(false)}
-            accessibilityRole="button"
-            accessibilityState={{ selected: !tts }}
-            style={[styles.option, !tts ? styles.optionActive : styles.optionIdle]}
-          >
-            <Text style={[styles.optionText, optionFont, !tts && styles.optionTextActive]}>しない</Text>
-            {!tts ? <Text style={styles.check}>✓</Text> : null}
-          </Pressable>
-        </View>
-        <Text style={styles.note}>
-          「する」だと せいかい や こえかけを よみます。おとが つかえない ときも あそべます。
-        </Text>
-      </View>
-
-      {/* BGM ながす/ながさない（ちいさな オルゴール風の おんがく）。よみあげとは別に切り替えられる。 */}
-      <View style={[styles.card, styles.cardGap]}>
-        <Text style={styles.label}>BGM（おんがく）</Text>
-        <View style={styles.options}>
-          <Pressable
-            onPress={() => onToggleBgm(true)}
-            accessibilityRole="button"
-            accessibilityState={{ selected: bgm }}
-            style={[styles.option, bgm ? styles.optionActive : styles.optionIdle]}
-          >
-            <Text style={[styles.optionText, optionFont, bgm && styles.optionTextActive]}>ながす</Text>
-            {bgm ? <Text style={styles.check}>✓</Text> : null}
-          </Pressable>
-          <Pressable
-            onPress={() => onToggleBgm(false)}
-            accessibilityRole="button"
-            accessibilityState={{ selected: !bgm }}
-            style={[styles.option, !bgm ? styles.optionActive : styles.optionIdle]}
-          >
-            <Text style={[styles.optionText, optionFont, !bgm && styles.optionTextActive]}>ながさない</Text>
-            {!bgm ? <Text style={styles.check}>✓</Text> : null}
-          </Pressable>
-        </View>
-        <Text style={styles.note}>
-          ちいさな おんがくが ながれます。しずかに あそびたい ときは「ながさない」に。
-        </Text>
-      </View>
-
-      {/* あつめた ほし（累計スタンプ）。数字スコアではなく“集めた⭐の数”。リセットはここだけ。 */}
-      <View style={[styles.card, styles.cardGap]}>
-        <Text style={styles.label}>あつめた ほし</Text>
-        <Text style={styles.starTotal}>⭐ × {stars}</Text>
-        <View style={styles.resetRow}>
-          {confirmReset ? (
+        {/* よみあげ する/しない（せいかい！・おしい／あれれ・タイトル・がんばりカードの こえ） */}
+        <View style={[styles.card, styles.cardGap]}>
+          <Text style={styles.label}>よみあげ</Text>
+          <View style={styles.options}>
             <Pressable
-              onPress={() => {
-                playSound('tap');
-                setConfirmReset(false);
-              }}
+              onPress={() => onToggleTts(true)}
               accessibilityRole="button"
-              style={[styles.resetBtn, styles.resetBtnGrow, styles.resetCancel]}
+              accessibilityState={{ selected: tts }}
+              style={[
+                styles.option,
+                tts ? styles.optionActive : styles.optionIdle,
+              ]}
             >
-              <Text style={styles.resetCancelText}>やめる</Text>
+              <Text
+                style={[
+                  styles.optionText,
+                  optionFont,
+                  tts && styles.optionTextActive,
+                ]}
+              >
+                する
+              </Text>
+              {tts ? <Text style={styles.check}>✓</Text> : null}
             </Pressable>
-          ) : null}
-          <Pressable
-            onPress={onResetPress}
-            accessibilityRole="button"
-            disabled={stars === 0 && !confirmReset}
-            style={[
-              styles.resetBtn,
-              confirmReset ? [styles.resetBtnGrow, styles.resetConfirm] : styles.resetIdle,
-              stars === 0 && !confirmReset ? styles.resetDisabled : null,
-            ]}
-          >
-            <Text style={confirmReset ? styles.resetConfirmText : styles.resetIdleText}>
-              {confirmReset ? 'ほんとうに 0に する' : '0に もどす'}
-            </Text>
-          </Pressable>
+            <Pressable
+              onPress={() => onToggleTts(false)}
+              accessibilityRole="button"
+              accessibilityState={{ selected: !tts }}
+              style={[
+                styles.option,
+                !tts ? styles.optionActive : styles.optionIdle,
+              ]}
+            >
+              <Text
+                style={[
+                  styles.optionText,
+                  optionFont,
+                  !tts && styles.optionTextActive,
+                ]}
+              >
+                しない
+              </Text>
+              {!tts ? <Text style={styles.check}>✓</Text> : null}
+            </Pressable>
+          </View>
+          <Text style={styles.note}>
+            「する」だと せいかい や こえかけを よみます。おとが つかえない
+            ときも あそべます。
+          </Text>
         </View>
-        <Text style={styles.note}>
-          あつめた ほし は へりません。ここでだけ 0に もどせます。0に しても、まち（ぴよぴよランド）の ⭐ は へりません。
-        </Text>
+
+        {/* BGM ながす/ながさない（ちいさな オルゴール風の おんがく）。よみあげとは別に切り替えられる。 */}
+        <View style={[styles.card, styles.cardGap]}>
+          <Text style={styles.label}>BGM（おんがく）</Text>
+          <View style={styles.options}>
+            <Pressable
+              onPress={() => onToggleBgm(true)}
+              accessibilityRole="button"
+              accessibilityState={{ selected: bgm }}
+              style={[
+                styles.option,
+                bgm ? styles.optionActive : styles.optionIdle,
+              ]}
+            >
+              <Text
+                style={[
+                  styles.optionText,
+                  optionFont,
+                  bgm && styles.optionTextActive,
+                ]}
+              >
+                ながす
+              </Text>
+              {bgm ? <Text style={styles.check}>✓</Text> : null}
+            </Pressable>
+            <Pressable
+              onPress={() => onToggleBgm(false)}
+              accessibilityRole="button"
+              accessibilityState={{ selected: !bgm }}
+              style={[
+                styles.option,
+                !bgm ? styles.optionActive : styles.optionIdle,
+              ]}
+            >
+              <Text
+                style={[
+                  styles.optionText,
+                  optionFont,
+                  !bgm && styles.optionTextActive,
+                ]}
+              >
+                ながさない
+              </Text>
+              {!bgm ? <Text style={styles.check}>✓</Text> : null}
+            </Pressable>
+          </View>
+          <Text style={styles.note}>
+            ちいさな おんがくが ながれます。しずかに あそびたい
+            ときは「ながさない」に。
+          </Text>
+        </View>
+
+        {/* あつめた ほし（累計スタンプ）。数字スコアではなく“集めた⭐の数”。リセットはここだけ。 */}
+        <View style={[styles.card, styles.cardGap]}>
+          <Text style={styles.label}>あつめた ほし</Text>
+          <Text style={styles.starTotal}>⭐ × {stars}</Text>
+          <View style={styles.resetRow}>
+            {confirmReset ? (
+              <Pressable
+                onPress={() => {
+                  playSound("tap");
+                  setConfirmReset(false);
+                }}
+                accessibilityRole="button"
+                style={[
+                  styles.resetBtn,
+                  styles.resetBtnGrow,
+                  styles.resetCancel,
+                ]}
+              >
+                <Text style={styles.resetCancelText}>やめる</Text>
+              </Pressable>
+            ) : null}
+            <Pressable
+              onPress={onResetPress}
+              accessibilityRole="button"
+              disabled={stars === 0 && !confirmReset}
+              style={[
+                styles.resetBtn,
+                confirmReset
+                  ? [styles.resetBtnGrow, styles.resetConfirm]
+                  : styles.resetIdle,
+                stars === 0 && !confirmReset ? styles.resetDisabled : null,
+              ]}
+            >
+              <Text
+                style={
+                  confirmReset ? styles.resetConfirmText : styles.resetIdleText
+                }
+              >
+                {confirmReset ? "ほんとうに 0に する" : "0に もどす"}
+              </Text>
+            </Pressable>
+          </View>
+          <Text style={styles.note}>
+            あつめた ほし は へりません。ここでだけ 0に もどせます。0に
+            しても、まち（ぴよぴよランド）の ⭐ は へりません。
+          </Text>
         </View>
 
         {/* 音声クレジット（VOICEVOX 利用規約）。同梱の読み上げクリップの出所を小さく明記する。 */}
@@ -219,7 +294,12 @@ export default function OtonaScreen({ onBack }: Props) {
 
       {/* 「もどる」はスクロールの外に固定し、背の低い画面でも常に押せるようにする（DESIGN §8）。 */}
       <View style={styles.backWrap}>
-        <BigButton emoji="◀️" label="もどる" onPress={onBack} color={colors.button} />
+        <BigButton
+          emoji="◀️"
+          label="もどる"
+          onPress={onBack}
+          color={colors.button}
+        />
       </View>
     </View>
   );
@@ -241,7 +321,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: font.title,
-    fontWeight: '800',
+    fontWeight: "800",
     color: colors.text,
     marginBottom: space.lg,
   },
@@ -257,12 +337,12 @@ const styles = StyleSheet.create({
   },
   label: {
     fontSize: font.body,
-    fontWeight: '800',
+    fontWeight: "800",
     color: colors.text,
     marginBottom: space.md,
   },
   options: {
-    flexDirection: 'row',
+    flexDirection: "row",
     columnGap: OPTION_GAP,
   },
   option: {
@@ -271,8 +351,8 @@ const styles = StyleSheet.create({
     borderRadius: radius.md,
     borderWidth: 3,
     paddingHorizontal: OPTION_PAD,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
   },
   optionIdle: {
     backgroundColor: colors.surface,
@@ -287,15 +367,15 @@ const styles = StyleSheet.create({
   },
   check: {
     // 選択中の印。文字の横に並べると狭い画面で文字が折り返すので、右上に重ねる。
-    position: 'absolute',
+    position: "absolute",
     top: 2,
     right: 8,
     fontSize: font.small,
     color: colors.white,
-    fontWeight: '900',
+    fontWeight: "900",
   },
   optionText: {
-    fontWeight: '900',
+    fontWeight: "900",
     color: colors.text,
   },
   note: {
@@ -307,18 +387,18 @@ const styles = StyleSheet.create({
   credit: {
     fontSize: font.small,
     color: colors.subtext,
-    textAlign: 'center',
+    textAlign: "center",
     marginTop: space.lg,
   },
   starTotal: {
     fontSize: font.huge,
-    fontWeight: '900',
+    fontWeight: "900",
     color: colors.text,
   },
   resetRow: {
     // 確認中は「やめる」「ほんとうに 0に する」が横に入りきらない幅で2段に折り返す（はみ出さない）。
-    flexDirection: 'row',
-    flexWrap: 'wrap',
+    flexDirection: "row",
+    flexWrap: "wrap",
     columnGap: space.sm,
     rowGap: space.sm,
     marginTop: space.md,
@@ -330,8 +410,8 @@ const styles = StyleSheet.create({
     minHeight: 52,
     borderRadius: radius.md,
     paddingHorizontal: space.md,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     borderWidth: 2,
   },
   resetIdle: {
@@ -340,7 +420,7 @@ const styles = StyleSheet.create({
   },
   resetIdleText: {
     fontSize: font.body,
-    fontWeight: '800',
+    fontWeight: "800",
     color: colors.subtext,
   },
   resetConfirm: {
@@ -349,7 +429,7 @@ const styles = StyleSheet.create({
   },
   resetConfirmText: {
     fontSize: font.body,
-    fontWeight: '900',
+    fontWeight: "900",
     color: colors.white,
   },
   resetCancel: {
@@ -358,7 +438,7 @@ const styles = StyleSheet.create({
   },
   resetCancelText: {
     fontSize: font.body,
-    fontWeight: '800',
+    fontWeight: "800",
     color: colors.text,
   },
   resetDisabled: {

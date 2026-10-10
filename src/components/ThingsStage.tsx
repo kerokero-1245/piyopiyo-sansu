@@ -13,12 +13,18 @@
 //   画面の回転などでステージの寸法・size が変わったときは、いま居るモノを新しい寸法の位置へ置き直す
 //   （増減アニメ中なら、アニメが終わったときに最新の寸法で置き直す）。
 
-import React, { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react';
-import { Animated, Easing, StyleSheet, Text, View } from 'react-native';
-import { colors, font } from '../theme';
-import { CharDef, Op, Step } from '../types';
-import { gridPlan } from '../game/grid';
-import { playCountTone, playSound } from '../audio/sounds';
+import React, {
+  forwardRef,
+  useEffect,
+  useImperativeHandle,
+  useRef,
+  useState,
+} from "react";
+import { Animated, Easing, StyleSheet, Text, View } from "react-native";
+import { colors, font } from "../theme";
+import { CharDef, Op, Step } from "../types";
+import { gridPlan } from "../game/grid";
+import { playCountTone, playSound } from "../audio/sounds";
 
 // 素材SVG（viewBox 内に余白が焼き込まれている）を、絵文字と同等の存在感にするための描画倍率。
 const OBJ_SCALE = 1.12;
@@ -49,8 +55,20 @@ interface Props {
 }
 
 const ThingsStage = forwardRef<ThingsStageHandle, Props>(function ThingsStage(
-  { char, initialCount, step, stepIndex, maxCount, size, gap, stageW, stageH, onReady, onDeltaStart },
-  ref
+  {
+    char,
+    initialCount,
+    step,
+    stepIndex,
+    maxCount,
+    size,
+    gap,
+    stageW,
+    stageH,
+    onReady,
+    onDeltaStart,
+  },
+  ref,
 ) {
   // モノ maxCount 個ぶんの Animated 値をセット開始時に一度だけ用意する（セット中は remount しない）。
   // enter: 存在（0=いない/1=いる、透明度＋登場スケール）。pop: 数え上げハイライト。posX/posY: 置き場所。
@@ -59,10 +77,22 @@ const ThingsStage = forwardRef<ThingsStageHandle, Props>(function ThingsStage(
   const posXRef = useRef<Animated.Value[]>([]);
   const posYRef = useRef<Animated.Value[]>([]);
   if (enterRef.current.length !== maxCount) {
-    enterRef.current = Array.from({ length: maxCount }, () => new Animated.Value(0));
-    popRef.current = Array.from({ length: maxCount }, () => new Animated.Value(0));
-    posXRef.current = Array.from({ length: maxCount }, () => new Animated.Value(0));
-    posYRef.current = Array.from({ length: maxCount }, () => new Animated.Value(0));
+    enterRef.current = Array.from(
+      { length: maxCount },
+      () => new Animated.Value(0),
+    );
+    popRef.current = Array.from(
+      { length: maxCount },
+      () => new Animated.Value(0),
+    );
+    posXRef.current = Array.from(
+      { length: maxCount },
+      () => new Animated.Value(0),
+    );
+    posYRef.current = Array.from(
+      { length: maxCount },
+      () => new Animated.Value(0),
+    );
   }
   const enter = enterRef.current;
   const pop = popRef.current;
@@ -88,7 +118,7 @@ const ThingsStage = forwardRef<ThingsStageHandle, Props>(function ThingsStage(
     () => () => {
       timers.current.forEach(clearTimeout);
     },
-    []
+    [],
   );
 
   // レイアウト依存の値は遅延タイマー内でも最新を読めるよう ref に写す。
@@ -140,7 +170,13 @@ const ThingsStage = forwardRef<ThingsStageHandle, Props>(function ThingsStage(
   const prevDimsRef = useRef({ stageW, stageH, size, gap });
   useEffect(() => {
     const p = prevDimsRef.current;
-    if (p.stageW === stageW && p.stageH === stageH && p.size === size && p.gap === gap) return;
+    if (
+      p.stageW === stageW &&
+      p.stageH === stageH &&
+      p.size === size &&
+      p.gap === gap
+    )
+      return;
     prevDimsRef.current = { stageW, stageH, size, gap };
     if (animatingRef.current) relayoutPendingRef.current = true;
     else relayoutPresent();
@@ -160,15 +196,23 @@ const ThingsStage = forwardRef<ThingsStageHandle, Props>(function ThingsStage(
     const stepMs = 150;
     for (let i = 0; i < initialCount; i++) {
       later(() => {
-        playSound('appear');
-        Animated.spring(enter[i], { toValue: 1, friction: 5, tension: 90, useNativeDriver: false }).start();
+        playSound("appear");
+        Animated.spring(enter[i], {
+          toValue: 1,
+          friction: 5,
+          tension: 90,
+          useNativeDriver: false,
+        }).start();
       }, i * stepMs);
     }
-    later(() => {
-      setPresent(initialCount);
-      finishAnim();
-      onDone();
-    }, initialCount * stepMs + 280);
+    later(
+      () => {
+        setPresent(initialCount);
+        finishAnim();
+        onDone();
+      },
+      initialCount * stepMs + 280,
+    );
   };
 
   // before → answer の増減を目の前で見せる。add=1匹ずつ歩いて入って整列 / sub=1匹ずつ帰る。
@@ -179,7 +223,7 @@ const ThingsStage = forwardRef<ThingsStageHandle, Props>(function ThingsStage(
     op: Op,
     slow: boolean,
     speak: boolean,
-    onDone: () => void
+    onDone: () => void,
   ) => {
     animatingRef.current = true;
     pop.forEach((v) => v.setValue(0));
@@ -191,15 +235,25 @@ const ThingsStage = forwardRef<ThingsStageHandle, Props>(function ThingsStage(
     const startDelay = slow ? 300 : 200;
 
     // 残る/寄り集まるモノを新しい位置へ（add は before 個、sub は answer 個が残る）。
-    const keep = op === 'add' ? before : answer;
+    const keep = op === "add" ? before : answer;
     for (let i = 0; i < keep; i++) {
-      Animated.spring(posX[i], { toValue: target[i].x, friction: 7, tension: 70, useNativeDriver: false }).start();
-      Animated.spring(posY[i], { toValue: target[i].y, friction: 7, tension: 70, useNativeDriver: false }).start();
+      Animated.spring(posX[i], {
+        toValue: target[i].x,
+        friction: 7,
+        tension: 70,
+        useNativeDriver: false,
+      }).start();
+      Animated.spring(posY[i], {
+        toValue: target[i].y,
+        friction: 7,
+        tension: 70,
+        useNativeDriver: false,
+      }).start();
     }
 
     // 増減するモノ（add=末尾に増える / sub=末尾から帰る）。
     const changing: number[] = [];
-    if (op === 'add') {
+    if (op === "add") {
       for (let i = before; i < answer; i++) changing.push(i);
     } else {
       for (let i = before - 1; i >= answer; i--) changing.push(i);
@@ -208,35 +262,49 @@ const ThingsStage = forwardRef<ThingsStageHandle, Props>(function ThingsStage(
     if (speak) onDeltaStart?.(op);
 
     changing.forEach((i, k) => {
-      later(() => {
-        if (op === 'add') {
-          // 画面右の外から その子の整列位置へ歩いてくる。
-          posX[i].setValue(W + S * 0.6);
-          posY[i].setValue(target[i].y);
-          enter[i].setValue(0);
-          playSound('appear');
-          Animated.spring(posX[i], { toValue: target[i].x, friction: 6, tension: 70, useNativeDriver: false }).start();
-          Animated.spring(enter[i], { toValue: 1, friction: 5, tension: 80, useNativeDriver: false }).start();
-        } else {
-          // ふわっと上へ帰りながら消える。
-          playSound('eat');
-          Animated.timing(enter[i], {
-            toValue: 0,
-            duration: slow ? 460 : 360,
-            easing: Easing.in(Easing.quad),
-            useNativeDriver: false,
-          }).start();
-          Animated.timing(posY[i], {
-            toValue: -S,
-            duration: slow ? 520 : 400,
-            easing: Easing.in(Easing.quad),
-            useNativeDriver: false,
-          }).start();
-        }
-      }, startDelay + k * stepMs);
+      later(
+        () => {
+          if (op === "add") {
+            // 画面右の外から その子の整列位置へ歩いてくる。
+            posX[i].setValue(W + S * 0.6);
+            posY[i].setValue(target[i].y);
+            enter[i].setValue(0);
+            playSound("appear");
+            Animated.spring(posX[i], {
+              toValue: target[i].x,
+              friction: 6,
+              tension: 70,
+              useNativeDriver: false,
+            }).start();
+            Animated.spring(enter[i], {
+              toValue: 1,
+              friction: 5,
+              tension: 80,
+              useNativeDriver: false,
+            }).start();
+          } else {
+            // ふわっと上へ帰りながら消える。
+            playSound("eat");
+            Animated.timing(enter[i], {
+              toValue: 0,
+              duration: slow ? 460 : 360,
+              easing: Easing.in(Easing.quad),
+              useNativeDriver: false,
+            }).start();
+            Animated.timing(posY[i], {
+              toValue: -S,
+              duration: slow ? 520 : 400,
+              easing: Easing.in(Easing.quad),
+              useNativeDriver: false,
+            }).start();
+          }
+        },
+        startDelay + k * stepMs,
+      );
     });
 
-    const total = startDelay + Math.max(1, changing.length) * stepMs + (slow ? 420 : 340);
+    const total =
+      startDelay + Math.max(1, changing.length) * stepMs + (slow ? 420 : 340);
     later(() => {
       setPresent(answer);
       finishAnim(); // アニメ中に寸法が変わっていたら、最新の寸法で置き直す
@@ -248,7 +316,7 @@ const ThingsStage = forwardRef<ThingsStageHandle, Props>(function ThingsStage(
   const lastStepRef = useRef<{ before: number; answer: number; op: Op }>({
     before: initialCount,
     answer: initialCount,
-    op: 'add',
+    op: "add",
   });
 
   // stepIndex が進むたびにその問題の増減アニメを走らせる。最初（マウント時）は登場→第1問の増減。
@@ -260,7 +328,9 @@ const ThingsStage = forwardRef<ThingsStageHandle, Props>(function ThingsStage(
     lastStepRef.current = { before: s.before, answer: s.answer, op: s.op };
     if (!introDoneRef.current) {
       introDoneRef.current = true;
-      runIntro(() => runDelta(s.before, s.answer, s.op, false, true, () => onReady?.()));
+      runIntro(() =>
+        runDelta(s.before, s.answer, s.op, false, true, () => onReady?.()),
+      );
     } else {
       runDelta(s.before, s.answer, s.op, false, true, () => onReady?.());
     }
@@ -280,7 +350,12 @@ const ThingsStage = forwardRef<ThingsStageHandle, Props>(function ThingsStage(
         }
         setCount(i + 1);
         playCountTone(i);
-        Animated.spring(pop[i], { toValue: 1, friction: 4, tension: 130, useNativeDriver: false }).start();
+        Animated.spring(pop[i], {
+          toValue: 1,
+          friction: 4,
+          tension: 130,
+          useNativeDriver: false,
+        }).start();
         // 通常モードは 11個目以降（i>=10）を少しテンポアップ（440→330）。長い数え上げを間延びさせない。
         // まちがい後のゆっくり提示（slow）は最後まで一定のゆっくりのまま（学びの反復は急がせない）。
         const stepMs = slow ? 680 : i >= 10 ? 330 : 440;
@@ -329,8 +404,14 @@ const ThingsStage = forwardRef<ThingsStageHandle, Props>(function ThingsStage(
           （見えないモノを読み上げると数がずれる）。増減の途中は始めの数のまま、終わったら答えの数になる。 */}
       <View style={StyleSheet.absoluteFill} pointerEvents="none">
         {enterRef.current.map((e, i) => {
-          const scaleEnter = e.interpolate({ inputRange: [0, 1], outputRange: [0.3, 1] });
-          const popScale = pop[i].interpolate({ inputRange: [0, 1], outputRange: [1, 1.16] });
+          const scaleEnter = e.interpolate({
+            inputRange: [0, 1],
+            outputRange: [0.3, 1],
+          });
+          const popScale = pop[i].interpolate({
+            inputRange: [0, 1],
+            outputRange: [1, 1.16],
+          });
           const scale = Animated.multiply(scaleEnter, popScale);
           const imgSize = size * OBJ_SCALE;
           const a11yHidden = i >= presentCount;
@@ -339,14 +420,20 @@ const ThingsStage = forwardRef<ThingsStageHandle, Props>(function ThingsStage(
               key={i}
               aria-hidden={a11yHidden}
               accessibilityElementsHidden={a11yHidden}
-              importantForAccessibility={a11yHidden ? 'no-hide-descendants' : 'auto'}
+              importantForAccessibility={
+                a11yHidden ? "no-hide-descendants" : "auto"
+              }
               style={[
                 styles.slot,
                 {
                   width: size,
                   height: size,
                   opacity: e,
-                  transform: [{ translateX: posX[i] }, { translateY: posY[i] }, { scale }],
+                  transform: [
+                    { translateX: posX[i] },
+                    { translateY: posY[i] },
+                    { scale },
+                  ],
                 },
               ]}
             >
@@ -357,7 +444,14 @@ const ThingsStage = forwardRef<ThingsStageHandle, Props>(function ThingsStage(
                   {
                     borderRadius: size,
                     opacity: pop[i],
-                    transform: [{ scale: pop[i].interpolate({ inputRange: [0, 1], outputRange: [0.6, 1] }) }],
+                    transform: [
+                      {
+                        scale: pop[i].interpolate({
+                          inputRange: [0, 1],
+                          outputRange: [0.6, 1],
+                        }),
+                      },
+                    ],
                   },
                 ]}
               />
@@ -389,23 +483,23 @@ export default ThingsStage;
 const styles = StyleSheet.create({
   wrap: {
     flex: 1,
-    alignSelf: 'stretch',
+    alignSelf: "stretch",
   },
   badgeSlot: {
     height: BADGE_H,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
   },
   badge: {
     width: 64,
     height: 64,
     borderRadius: 32,
     backgroundColor: colors.countBadge,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     borderWidth: 4,
     borderColor: colors.white,
-    shadowColor: '#00000055',
+    shadowColor: "#00000055",
     shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 0.3,
     shadowRadius: 6,
@@ -413,19 +507,19 @@ const styles = StyleSheet.create({
   },
   badgeText: {
     fontSize: font.title,
-    fontWeight: '900',
+    fontWeight: "900",
     color: colors.white,
   },
   slot: {
     // モノ1つぶんの枠（絶対配置）。halo（絶対配置）と、少し大きめの素材画像を中央にそろえる。
-    position: 'absolute',
+    position: "absolute",
     left: 0,
     top: 0,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
   },
   halo: {
-    position: 'absolute',
+    position: "absolute",
     top: 0,
     left: 0,
     right: 0,
@@ -435,7 +529,7 @@ const styles = StyleSheet.create({
     borderColor: colors.countRing,
   },
   hidden: {
-    position: 'absolute',
+    position: "absolute",
     left: 0,
     top: 0,
     fontSize: 1,

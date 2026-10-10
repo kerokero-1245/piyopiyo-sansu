@@ -10,8 +10,8 @@
 //
 // DOM lib に依存しないよう、必要な形だけ最小宣言して globalThis から取り出す。
 
-import { Platform } from 'react-native';
-import { CLIP_URLS, hasClip } from './voiceClips';
+import { Platform } from "react-native";
+import { CLIP_URLS, hasClip } from "./voiceClips";
 
 interface AudioEl {
   play(): Promise<void> | void;
@@ -24,7 +24,7 @@ interface AudioEl {
 type AudioCtor = new (src?: string) => AudioEl;
 
 function getAudioCtor(): AudioCtor | null {
-  if (Platform.OS !== 'web') return null;
+  if (Platform.OS !== "web") return null;
   try {
     const g = globalThis as unknown as { Audio?: AudioCtor };
     return g.Audio ?? null;
@@ -92,7 +92,7 @@ export function playClip(name: string, onEnd?: () => void): boolean {
     const p = a.play();
     // play() の Promise 拒否（ユーザー操作前など）は握りつぶす（遊びは壊さない）。再生できな
     // かったときも終了通知は出す（ダッキングを解除して BGM を元の音量へ戻す）。
-    if (p && typeof (p as Promise<void>).catch === 'function') {
+    if (p && typeof (p as Promise<void>).catch === "function") {
       (p as Promise<void>).catch(() => {
         if (current === a) {
           current = null;
@@ -120,7 +120,7 @@ export function warmUpClips(): void {
     const a = new A(CLIP_URLS[first]);
     a.muted = true;
     const p = a.play();
-    if (p && typeof (p as Promise<void>).then === 'function') {
+    if (p && typeof (p as Promise<void>).then === "function") {
       (p as Promise<void>)
         .then(() => {
           try {

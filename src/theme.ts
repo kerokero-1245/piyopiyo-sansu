@@ -4,46 +4,46 @@
 
 export const colors = {
   // 地の色
-  bg: '#FFF6E5', // やわらかいクリーム（背景）
-  surface: '#FFFFFF', // カード
+  bg: "#FFF6E5", // やわらかいクリーム（背景）
+  surface: "#FFFFFF", // カード
 
   // ステージ（モノを置く場）
-  stageBg: '#FFFDF6',
-  stageBorder: '#F0D9A8',
+  stageBg: "#FFFDF6",
+  stageBorder: "#F0D9A8",
 
   // 数え上げのハイライト
-  countHalo: '#FFE9A6', // 数えたモノの下にともる やわらかい光
-  countRing: '#FF9F45', // その縁どり
-  countBadge: '#FF6B6B', // 「1・2・3」の大きな数字バッジ
+  countHalo: "#FFE9A6", // 数えたモノの下にともる やわらかい光
+  countRing: "#FF9F45", // その縁どり
+  countBadge: "#FF6B6B", // 「1・2・3」の大きな数字バッジ
 
   // 選択肢ボタン
-  choice: '#FFFFFF',
-  choicePressed: '#F3ECDD',
-  choiceBorder: '#F0D9A8',
-  dot: '#FF8FA3', // 選択肢のドット（●）
-  dotBorder: '#F26D86',
+  choice: "#FFFFFF",
+  choicePressed: "#F3ECDD",
+  choiceBorder: "#F0D9A8",
+  dot: "#FF8FA3", // 選択肢のドット（●）
+  dotBorder: "#F26D86",
 
   // 前向きなボタン
-  button: '#FF9F45', // オレンジ
-  buttonPressed: '#F08A2E',
-  play: '#5FBF7A', // 「あそぶ」など
-  playPressed: '#4EA867',
+  button: "#FF9F45", // オレンジ
+  buttonPressed: "#F08A2E",
+  play: "#5FBF7A", // 「あそぶ」など
+  playPressed: "#4EA867",
 
   // 進捗ドット（何問目か）
-  progressOn: '#5FBF7A',
-  progressNow: '#FF9F45',
-  progressOff: '#E8D9BE',
+  progressOn: "#5FBF7A",
+  progressNow: "#FF9F45",
+  progressOff: "#E8D9BE",
 
   // 文字（読める子むけの装飾程度）
-  text: '#5B3A1E', // こげ茶
-  subtext: '#9B7B57',
-  white: '#FFFFFF',
+  text: "#5B3A1E", // こげ茶
+  subtext: "#9B7B57",
+  white: "#FFFFFF",
 
   // 祝福の紙吹雪
-  confetti: ['#FF6B6B', '#FFD93D', '#6BCB77', '#4D96FF', '#FF9F45', '#C77DFF'],
+  confetti: ["#FF6B6B", "#FFD93D", "#6BCB77", "#4D96FF", "#FF9F45", "#C77DFF"],
 
-  primary: '#FF9F45',
-  overlay: 'rgba(43, 26, 12, 0.45)', // 祝福オーバーレイの背後を少し暗く
+  primary: "#FF9F45",
+  overlay: "rgba(43, 26, 12, 0.45)", // 祝福オーバーレイの背後を少し暗く
 };
 
 // 大きめのフォント。ひらがなは「読める子には嬉しい」装飾程度に留める。

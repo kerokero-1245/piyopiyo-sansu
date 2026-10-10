@@ -11,21 +11,33 @@
 //   ステージが潰れるので、左に「ヘッダー＋ステージ」、右に「問い＋選択肢（縦に3つ）」を並べる。
 //   どちらの並びでも要素の木（mainCol / sideCol）は同じにして、回転してもステージを作り直さない。
 
-import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { LayoutChangeEvent, Pressable, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
-import { colors, font, radius, space } from '../theme';
-import { generateStorySet } from '../game/problems';
-import { sizingPlan } from '../game/grid';
-import { FRAME_MAX_W_WIDE, isCompactLandscape } from '../layout';
-import { addStars, getMaxSum, getTtsOn } from '../settings';
-import { playSound } from '../audio/sounds';
-import { cancelVoice, sayDelta, sayPhrase, sayWrongCheer } from '../audio/voice';
-import { CharDef, Op, StorySet } from '../types';
-import ThingsStage, { ThingsStageHandle } from '../components/ThingsStage';
-import ChoiceButton from '../components/ChoiceButton';
-import ClearOverlay from '../components/ClearOverlay';
-import Confetti from '../components/Confetti';
-import ProgressStar from '../components/ProgressStar';
+import React, { useCallback, useEffect, useRef, useState } from "react";
+import {
+  LayoutChangeEvent,
+  Pressable,
+  StyleSheet,
+  Text,
+  useWindowDimensions,
+  View,
+} from "react-native";
+import { colors, font, radius, space } from "../theme";
+import { generateStorySet } from "../game/problems";
+import { sizingPlan } from "../game/grid";
+import { FRAME_MAX_W_WIDE, isCompactLandscape } from "../layout";
+import { addStars, getMaxSum, getTtsOn } from "../settings";
+import { playSound } from "../audio/sounds";
+import {
+  cancelVoice,
+  sayDelta,
+  sayPhrase,
+  sayWrongCheer,
+} from "../audio/voice";
+import { CharDef, Op, StorySet } from "../types";
+import ThingsStage, { ThingsStageHandle } from "../components/ThingsStage";
+import ChoiceButton from "../components/ChoiceButton";
+import ClearOverlay from "../components/ClearOverlay";
+import Confetti from "../components/Confetti";
+import ProgressStar from "../components/ProgressStar";
 
 interface Props {
   onHome: () => void;
@@ -57,7 +69,11 @@ const QUESTION_EM = 10;
 // 実測した残り領域に、お話に出る数（counts）がどれも収まるモノの1辺を求める（セット中は不変）。
 // 下限は「収まること」を優先して小さく取る（12）。領域の下限は 0（以前の 80 は、背の低い横向きで
 // 実際より広い領域を仮定してモノをステージ外へ出していた）。
-function computeThingSize(w: number, h: number, counts: readonly number[]): number {
+function computeThingSize(
+  w: number,
+  h: number,
+  counts: readonly number[],
+): number {
   const { cols, rows } = sizingPlan(counts);
   const usableW = Math.max(w - space.md * 2, 0);
   const usableH = Math.max(h - BADGE_RESERVE - space.md, 0);
@@ -68,7 +84,8 @@ function computeThingSize(w: number, h: number, counts: readonly number[]): numb
   const gridW = cols * PREFERRED_MIN + (cols - 1) * GAP;
   const gridH = rows * PREFERRED_MIN + (rows - 1) * GAP;
   const fitsPreferred =
-    gridW <= w - PREFERRED_EDGE * 2 && gridH <= h - BADGE_RESERVE - PREFERRED_EDGE * 2;
+    gridW <= w - PREFERRED_EDGE * 2 &&
+    gridH <= h - BADGE_RESERVE - PREFERRED_EDGE * 2;
   return fitsPreferred ? PREFERRED_MIN : fit;
 }
 
@@ -107,7 +124,7 @@ export default function PlayScreen({ onHome }: Props) {
       timers.current.forEach(clearTimeout);
       cancelVoice(); // 画面を離れるときは読み上げも止める
     },
-    []
+    [],
   );
 
   const step = story.steps[index];
@@ -119,8 +136,13 @@ export default function PlayScreen({ onHome }: Props) {
   const { width: windowW, height: windowH } = useWindowDimensions();
   const side = isCompactLandscape(windowW, windowH);
   const frameInnerW = Math.min(windowW, FRAME_MAX_W_WIDE) - space.md * 2;
-  const sideW = Math.round(Math.min(SIDE_MAX_W, Math.max(SIDE_MIN_W, frameInnerW * SIDE_RATIO)));
-  const sideQuestionFont = Math.min(font.title, Math.floor((sideW - space.xs) / QUESTION_EM));
+  const sideW = Math.round(
+    Math.min(SIDE_MAX_W, Math.max(SIDE_MIN_W, frameInnerW * SIDE_RATIO)),
+  );
+  const sideQuestionFont = Math.min(
+    font.title,
+    Math.floor((sideW - space.xs) / QUESTION_EM),
+  );
   // 選択肢のドット欄は「かずの おおきさ」で出うる最大値の行数（5個/行）ぶんを常に確保する。
   // 問題ごとの数でボタンの高さが変わると、flex:1 のステージが伸び縮みし、モノの大きさと
   // 置き場所がズレて下の段が切れる（20まで の 515x684 で実際に発生）。行数を固定して防ぐ。
@@ -129,7 +151,9 @@ export default function PlayScreen({ onHome }: Props) {
 
   const onStageLayout = (e: LayoutChangeEvent) => {
     const { width, height } = e.nativeEvent.layout;
-    setMeasured((m) => (m.w === width && m.h === height ? m : { w: width, h: height }));
+    setMeasured((m) =>
+      m.w === width && m.h === height ? m : { w: width, h: height },
+    );
   };
 
   const handleReady = useCallback(() => {
@@ -154,7 +178,11 @@ export default function PlayScreen({ onHome }: Props) {
   }, [index, story.steps.length]);
 
   const newGame = useCallback(() => {
-    const s = generateStorySet(maxSumRef.current, SET_SIZE, prevCharRef.current);
+    const s = generateStorySet(
+      maxSumRef.current,
+      SET_SIZE,
+      prevCharRef.current,
+    );
     prevCharRef.current = s.char;
     setStory(s);
     setIndex(0);
@@ -170,7 +198,7 @@ export default function PlayScreen({ onHome }: Props) {
   const onChoice = useCallback(
     (value: number) => {
       if (!ready || locked || done) return;
-      playSound('tap');
+      playSound("tap");
       if (value === step.answer) {
         // 正解: 「せいかい！」→ その後に 数え上げ → ⭐スタンプ獲得 → ちいさな紙吹雪 → 次へ（順序厳守）。
         // 再挑戦してからのクリアでも同じ⭐（獲得に条件差はつけない・DESIGN §14）。
@@ -181,7 +209,7 @@ export default function PlayScreen({ onHome }: Props) {
             // ⭐を1つ獲得。累計にも加算し、進捗ドットを⭐へ（ぽんっと出る）。
             addStars(1);
             setStarsEarned((s) => s + 1);
-            playSound('star');
+            playSound("star");
             setCelebrating(true);
             later(() => {
               setCelebrating(false);
@@ -190,7 +218,7 @@ export default function PlayScreen({ onHome }: Props) {
           }, false);
         if (ttsRef.current) {
           // まず「せいかい！」（tier1 クリップ → tier2 TTS）。少し先行させてから数え上げへ。
-          sayPhrase('seikai', { enabled: true });
+          sayPhrase("seikai", { enabled: true });
           later(startCountUp, SEIKAI_LEAD_MS);
         } else {
           startCountUp(); // 読み上げオフ: これまで通り即・数え上げ
@@ -200,7 +228,7 @@ export default function PlayScreen({ onHome }: Props) {
         // もう一度。罰なし（DESIGN §4）。
         setWrongValue(value);
         setWrongNonce((n) => n + 1);
-        playSound('wrong');
+        playSound("wrong");
         if (ttsRef.current) sayWrongCheer({ enabled: true });
         setReady(false);
         setLocked(true);
@@ -209,26 +237,26 @@ export default function PlayScreen({ onHome }: Props) {
             stageRef.current?.reset();
             setLocked(false);
             setReady(true);
-          }, true)
+          }, true),
         );
       }
     },
-    [ready, locked, done, step, goNext, later]
+    [ready, locked, done, step, goNext, later],
   );
 
   const choicesDisabled = !ready || locked || done;
   const phase = done
-    ? 'done'
+    ? "done"
     : celebrating
-      ? 'celebrate'
+      ? "celebrate"
       : ready
-        ? 'ready'
+        ? "ready"
         : locked
-          ? 'busy'
-          : 'anim';
+          ? "busy"
+          : "anim";
   // 増減アニメ中（anim）は 問い・選択肢を見せない（経過を見ないと問いが始まらない・DESIGN §15）。
   // 高さは保ったまま opacity で隠すのでステージのサイズは動かない（モノがガタつかない・§8）。
-  const revealed = phase !== 'anim';
+  const revealed = phase !== "anim";
 
   return (
     <View style={[styles.root, side && styles.rootSide]}>
@@ -236,20 +264,31 @@ export default function PlayScreen({ onHome }: Props) {
       <View style={styles.mainCol}>
         {/* ヘッダー: おうち＋進捗ドット */}
         <View style={styles.header}>
-          <Pressable onPress={onHome} hitSlop={10} style={styles.homeBtn} accessibilityLabel="おうちへ">
+          <Pressable
+            onPress={onHome}
+            hitSlop={10}
+            style={styles.homeBtn}
+            accessibilityLabel="おうちへ"
+          >
             <Text style={styles.homeGlyph}>🏠</Text>
           </Pressable>
           <View style={styles.progress} testID="progress">
             {story.steps.map((_, i) => (
               // クリア済み=⭐ / いまの問題=オレンジ丸 / これから=グレー丸
-              <ProgressStar key={i} state={i < starsEarned ? 'star' : i === index ? 'now' : 'off'} />
+              <ProgressStar
+                key={i}
+                state={i < starsEarned ? "star" : i === index ? "now" : "off"}
+              />
             ))}
           </View>
           <View style={styles.homeBtn} />
         </View>
 
         {/* ステージ: セット中は remount しない（key=gameId）。グループが問題をまたいで残る。 */}
-        <View style={[styles.stage, side && styles.stageSide]} onLayout={onStageLayout}>
+        <View
+          style={[styles.stage, side && styles.stageSide]}
+          onLayout={onStageLayout}
+        >
           {measured.w > 0 && measured.h > 0 ? (
             <ThingsStage
               key={gameId}
@@ -273,21 +312,30 @@ export default function PlayScreen({ onHome }: Props) {
       {/* 右（縦持ちでは下）: 問い＋選択肢 */}
       <View style={side ? [styles.sideCol, { width: sideW }] : null}>
         {/* 問い（増減アニメ中は隠す。高さは確保） */}
-        <View style={[styles.questionBand, side && styles.questionBandSide, { opacity: revealed ? 1 : 0 }]}>
+        <View
+          style={[
+            styles.questionBand,
+            side && styles.questionBandSide,
+            { opacity: revealed ? 1 : 0 },
+          ]}
+        >
           <Text
             style={[styles.question, side && { fontSize: sideQuestionFont }]}
             numberOfLines={1}
             adjustsFontSizeToFit
           >
-            {step.op === 'add' ? 'ぜんぶで ' : 'のこりは '}
+            {step.op === "add" ? "ぜんぶで " : "のこりは "}
             {story.char.ask}?
           </Text>
         </View>
 
         {/* 選択肢（●●●＋数字）。増減アニメ中は隠す（高さは確保）＋押せない。 */}
         <View
-          style={[side ? styles.answersSide : styles.answers, { opacity: revealed ? 1 : 0 }]}
-          pointerEvents={revealed ? 'auto' : 'none'}
+          style={[
+            side ? styles.answersSide : styles.answers,
+            { opacity: revealed ? 1 : 0 },
+          ]}
+          pointerEvents={revealed ? "auto" : "none"}
         >
           {step.choices.map((c) => (
             <ChoiceButton
@@ -325,7 +373,9 @@ export default function PlayScreen({ onHome }: Props) {
       ) : null}
 
       {celebrating ? <Confetti /> : null}
-      {done ? <ClearOverlay starCount={SET_SIZE} onReplay={newGame} onHome={onHome} /> : null}
+      {done ? (
+        <ClearOverlay starCount={SET_SIZE} onReplay={newGame} onHome={onHome} />
+      ) : null}
     </View>
   );
 }
@@ -335,7 +385,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   rootSide: {
-    flexDirection: 'row',
+    flexDirection: "row",
     columnGap: space.sm,
   },
   // 縦持ちでは ヘッダー＋ステージ（flex:1）の入れ物。中身の並び・大きさは従来と同じ。
@@ -344,38 +394,38 @@ const styles = StyleSheet.create({
   },
   // 背の低い横向きの右の列（問い＋選択肢）。幅は sideW。
   sideCol: {
-    justifyContent: 'center',
+    justifyContent: "center",
   },
   header: {
     height: 48,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
   },
   homeBtn: {
     width: 44,
     height: 44,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
   },
   homeGlyph: {
     fontSize: 28,
   },
   progress: {
-    flexDirection: 'row',
+    flexDirection: "row",
     columnGap: space.sm,
-    alignItems: 'center',
+    alignItems: "center",
   },
   stage: {
     flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     backgroundColor: colors.stageBg,
     borderRadius: radius.lg,
     borderWidth: 2,
     borderColor: colors.stageBorder,
     marginVertical: space.sm,
-    overflow: 'hidden',
+    overflow: "hidden",
   },
   stageSide: {
     marginTop: space.xs,
@@ -383,8 +433,8 @@ const styles = StyleSheet.create({
   },
   questionBand: {
     minHeight: 44,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     marginBottom: space.sm,
   },
   questionBandSide: {
@@ -393,11 +443,11 @@ const styles = StyleSheet.create({
   },
   question: {
     fontSize: font.title,
-    fontWeight: '900',
+    fontWeight: "900",
     color: colors.text,
   },
   answers: {
-    flexDirection: 'row',
+    flexDirection: "row",
     columnGap: space.sm,
     paddingBottom: space.sm,
   },
@@ -407,7 +457,7 @@ const styles = StyleSheet.create({
     rowGap: space.xs,
   },
   hidden: {
-    position: 'absolute',
+    position: "absolute",
     left: 0,
     top: 0,
     fontSize: 1,

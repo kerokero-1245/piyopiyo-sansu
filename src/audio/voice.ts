@@ -9,11 +9,11 @@
 //
 // iOS Safari の自動再生制限（最初のユーザー操作より前に音を出せない）は warmUpVoice() で守る。
 
-import { isClipAvailable, playClip, warmUpClips, cancelClip } from './clips';
-import { CLIP_URLS } from './voiceClips';
-import { speak, warmUpSpeech, cancelSpeech, isSpeechAvailable } from './speech';
-import { duckBgm, unduckBgm } from './bgm/engine';
-import { Op } from '../types';
+import { isClipAvailable, playClip, warmUpClips, cancelClip } from "./clips";
+import { CLIP_URLS } from "./voiceClips";
+import { speak, warmUpSpeech, cancelSpeech, isSpeechAvailable } from "./speech";
+import { duckBgm, unduckBgm } from "./bgm/engine";
+import { Op } from "../types";
 
 // 読み上げ1回ぶんの指定。clip=同梱クリップの基名（無ければ tier2 へ）/ text=フォールバック読み上げ文字列。
 export interface VoiceSpec {
@@ -28,20 +28,21 @@ export interface VoiceSpec {
 // dekita … がんばりカードの「ぜんぶ できたね！」（5つ揃った祝福）。
 // kitayo / kaettayo … つづきもの出題の増減の合図（add=1匹きたよ！/ sub=1匹かえったよ・DESIGN §15）。
 //   同梱クリップ p_kitayo / p_kaettayo があれば tier1、無ければ tier2（TTS）が text を読む。
-export type PhraseKey = 'seikai' | 'title' | 'oshii' | 'arere' | 'dekita' | 'kitayo' | 'kaettayo';
+export type PhraseKey =
+  "seikai" | "title" | "oshii" | "arere" | "dekita" | "kitayo" | "kaettayo";
 export const PHRASE_VOICE: Record<PhraseKey, VoiceSpec> = {
-  seikai: { clip: 'p_seikai', text: 'せいかい' },
-  title: { clip: 't_sansu', text: 'ぴよぴよさんすう' },
-  oshii: { clip: 'e_oshii', text: 'おしい' },
-  arere: { clip: 'e_arere', text: 'あれれ' },
-  dekita: { clip: 'p_zenbu', text: 'ぜんぶ できたね' },
-  kitayo: { clip: 'p_kitayo', text: 'きたよ' },
-  kaettayo: { clip: 'p_kaettayo', text: 'かえったよ' },
+  seikai: { clip: "p_seikai", text: "せいかい" },
+  title: { clip: "t_sansu", text: "ぴよぴよさんすう" },
+  oshii: { clip: "e_oshii", text: "おしい" },
+  arere: { clip: "e_arere", text: "あれれ" },
+  dekita: { clip: "p_zenbu", text: "ぜんぶ できたね" },
+  kitayo: { clip: "p_kitayo", text: "きたよ" },
+  kaettayo: { clip: "p_kaettayo", text: "かえったよ" },
 };
 
 // 誤答タップの声かけを「おしい」→「あれれ」で交互に返すローテ（呼ぶたび1つ進む）。
 // どちらも やさしい相づち。否定語・失敗表示はしない（罰なし・DESIGN §4 / WORLD 正典）。
-const WRONG_CHEERS: PhraseKey[] = ['oshii', 'arere'];
+const WRONG_CHEERS: PhraseKey[] = ["oshii", "arere"];
 let wrongCheerIdx = 0;
 
 // 声の再生中だけ BGM を控えめに下げる（ダッキング）。開始で沈め、終了（自然終了 / エラー /
@@ -85,7 +86,7 @@ export function sayPhrase(key: PhraseKey, opts?: { enabled?: boolean }): void {
 // つづきもの出題の増減の合図。add=「きたよ！」/ sub=「かえったよ」。3段構えは playVoice にまかせる。
 // enabled=false（読み上げオフ）なら何もしない（＝ 効果音＋アニメだけ）。
 export function sayDelta(op: Op, opts?: { enabled?: boolean }): void {
-  playVoice(PHRASE_VOICE[op === 'add' ? 'kitayo' : 'kaettayo'], opts);
+  playVoice(PHRASE_VOICE[op === "add" ? "kitayo" : "kaettayo"], opts);
 }
 
 // 誤答タップのやさしい声かけ。呼ぶたびに「おしい」「あれれ」を交互に読む。

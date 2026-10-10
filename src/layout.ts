@@ -1,6 +1,6 @@
 // 画面の大きさ・向きに応じたレイアウトの判定（DESIGN §8）。App.tsx・PlayScreen・ClearOverlay で共有する。
 
-import { space } from './theme';
+import { space } from "./theme";
 
 // 縦持ち前提の枠（App.tsx の frame）の最大幅。
 export const FRAME_MAX_W = 480;
