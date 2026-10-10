@@ -51,6 +51,8 @@ npm start            # Expo を起動 → ターミナルで w を押すと Web 
 
 ショートカット: `npm run web`（`w` を押さず直接 Web 起動）。型の確認は `npm run typecheck`（`tsc --noEmit`）。
 
+テスト: `npm test`（Node 標準の `node --test`。出題・モノの並び・保存の純関数を [tests/](tests/) で確かめる。src を Node で読む仕組みは [tests/register.mjs](tests/register.mjs)）。
+
 ### Web ビルド（配布用の静的サイト書き出し）
 
 ```sh

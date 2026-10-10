@@ -21,6 +21,7 @@
     "android": "expo start --android",
     "ios": "expo start --ios",
     "typecheck": "tsc --noEmit",
+    "test": "node --test --import ./tests/register.mjs \"tests/**/*.test.ts\"",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "web": "expo start --web"
