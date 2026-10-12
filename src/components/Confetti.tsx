@@ -25,7 +25,6 @@ interface PieceSpec {
 }
 
 function Piece({ spec, fallH }: { spec: PieceSpec; fallH: number }) {
-  // eslint-disable-next-line react-hooks/refs -- Animated.Value を最初の描画で 1 つ作り、以後は同じものを持ち続ける（描画中に作り替えない）
   const p = useRef(new Animated.Value(0)).current;
   const [done, setDone] = useState(false);
   useEffect(() => {
@@ -48,22 +47,18 @@ function Piece({ spec, fallH }: { spec: PieceSpec; fallH: number }) {
 
   // 降りる先は、回転した角まで含めて枠の下端に収まる位置（fallH は枠の高さ）。
   const endY = Math.max(0, fallH - spec.size * (1 + ROTATE_OVERHANG));
-  // eslint-disable-next-line react-hooks/refs -- 上の useRef で持つ Animated.Value を補間するだけ（描画中に ref の中身は変わらない）
   const translateY = p.interpolate({
     inputRange: [0, 1],
     outputRange: [-40, endY],
   });
-  // eslint-disable-next-line react-hooks/refs -- 上の useRef で持つ Animated.Value を補間するだけ（描画中に ref の中身は変わらない）
   const translateX = p.interpolate({
     inputRange: [0, 0.5, 1],
     outputRange: [0, spec.drift, 0],
   });
-  // eslint-disable-next-line react-hooks/refs -- 上の useRef で持つ Animated.Value を補間するだけ（描画中に ref の中身は変わらない）
   const rotate = p.interpolate({
     inputRange: [0, 1],
     outputRange: ["0deg", `${spec.spin}deg`],
   });
-  // eslint-disable-next-line react-hooks/refs -- 上の useRef で持つ Animated.Value を補間するだけ（描画中に ref の中身は変わらない）
   const opacity = p.interpolate({
     inputRange: [0, 0.85, 1],
     outputRange: [1, 1, 0],

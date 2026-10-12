@@ -13,7 +13,6 @@ export type StarState = "off" | "now" | "star";
 
 export default function ProgressStar({ state }: { state: StarState }) {
   // pop: 0=これから出る / 1=定位置。'star' に変わった瞬間に 0→1 でポップさせる。
-  // eslint-disable-next-line react-hooks/refs -- Animated.Value を最初の描画で 1 つ作り、以後は同じものを持ち続ける（描画中に作り替えない）
   const pop = useRef(new Animated.Value(state === "star" ? 1 : 0)).current;
   const prev = useRef<StarState>(state);
 
@@ -42,7 +41,6 @@ export default function ProgressStar({ state }: { state: StarState }) {
             {
               transform: [
                 {
-                  // eslint-disable-next-line react-hooks/refs -- 上の useRef で持つ Animated.Value を補間するだけ（描画中に ref の中身は変わらない）
                   scale: pop.interpolate({
                     inputRange: [0, 1],
                     outputRange: [0.2, 1],

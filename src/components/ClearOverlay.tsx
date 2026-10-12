@@ -104,7 +104,6 @@ interface Props {
 
 // カード上の⭐スロット1つ。まだ出ていないときは薄い☆、出た瞬間に⭐が「ぽんっ」と現れる。
 function CardStar({ filled, size }: { filled: boolean; size: number }) {
-  // eslint-disable-next-line react-hooks/refs -- Animated.Value を最初の描画で 1 つ作り、以後は同じものを持ち続ける（描画中に作り替えない）
   const pop = useRef(new Animated.Value(filled ? 1 : 0)).current;
   const prev = useRef(filled);
   useEffect(() => {
@@ -137,9 +136,7 @@ function CardStar({ filled, size }: { filled: boolean; size: number }) {
       </View>
     );
   }
-  // eslint-disable-next-line react-hooks/refs -- 上の useRef で持つ Animated.Value を補間するだけ（描画中に ref の中身は変わらない）
   const scale = pop.interpolate({ inputRange: [0, 1], outputRange: [0.2, 1] });
-  // eslint-disable-next-line react-hooks/refs -- 上の useRef で持つ Animated.Value を補間するだけ（描画中に ref の中身は変わらない）
   const opacity = pop.interpolate({
     inputRange: [0, 0.4, 1],
     outputRange: [0, 1, 1],
@@ -157,7 +154,6 @@ function CardStar({ filled, size }: { filled: boolean; size: number }) {
 
 export default function ClearOverlay({ starCount, onReplay, onHome }: Props) {
   // 累計は既に加算済み。マウント時に一度だけ読む（おとなモードで 0 に もどした後は、そこからの数）。
-  // eslint-disable-next-line react-hooks/refs -- マウント時の累計を 1 度だけ読んで持ち続ける（描画中に書き換えない）
   const total = useRef(getShownStars()).current;
 
   // 背の低い横向きで幅が足りるときだけ左右に並べる（中身の入れ物の実測幅で決める）。
@@ -191,9 +187,7 @@ export default function ClearOverlay({ starCount, onReplay, onHome }: Props) {
   const [shown, setShown] = useState(0); // いくつ⭐が現れたか（0..starCount）
   const [gathered, setGathered] = useState(false); // 5つ揃った（祝福）
 
-  // eslint-disable-next-line react-hooks/refs -- Animated.Value を最初の描画で 1 つ作り、以後は同じものを持ち続ける（描画中に作り替えない）
   const scale = useRef(new Animated.Value(0.3)).current;
-  // eslint-disable-next-line react-hooks/refs -- Animated.Value を最初の描画で 1 つ作り、以後は同じものを持ち続ける（描画中に作り替えない）
   const opacity = useRef(new Animated.Value(0)).current;
   const timers = useRef<ReturnType<typeof setTimeout>[]>([]);
 
@@ -262,11 +256,9 @@ export default function ClearOverlay({ starCount, onReplay, onHome }: Props) {
         onLayout={(e) => setBoxW(e.nativeEvent.layout.width)}
       >
         <Animated.View
-          // eslint-disable-next-line react-hooks/refs -- 上の useRef で持つ Animated.Value を style に渡すだけ（描画中に ref の中身は変わらない）
           style={[
             styles.card,
             sideBySide && styles.cardSide,
-            // eslint-disable-next-line react-hooks/refs -- 上の useRef で持つ Animated.Value を style に渡すだけ（描画中に ref の中身は変わらない）
             { opacity, transform: [{ scale }] },
           ]}
         >
