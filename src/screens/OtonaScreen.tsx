@@ -129,8 +129,11 @@ export default function OtonaScreen({ onBack }: Props) {
         <View style={styles.card}>
           <Text style={styles.label}>かずの おおきさ</Text>
           <View style={styles.options}>
+            {/* eslint-disable-next-line react-hooks/static-components -- Option は描画のたびに作り直されるが、状態を持たない。外へ出すと挙動に触れるので別の段で直す */}
             <Option v={5} label="5まで" />
+            {/* eslint-disable-next-line react-hooks/static-components -- Option は描画のたびに作り直されるが、状態を持たない。外へ出すと挙動に触れるので別の段で直す */}
             <Option v={10} label="10まで" />
+            {/* eslint-disable-next-line react-hooks/static-components -- Option は描画のたびに作り直されるが、状態を持たない。外へ出すと挙動に触れるので別の段で直す */}
             <Option v={20} label="20まで" />
           </View>
           <Text style={styles.note}>

@@ -25,6 +25,7 @@ interface PieceSpec {
 }
 
 function Piece({ spec, fallH }: { spec: PieceSpec; fallH: number }) {
+  // eslint-disable-next-line react-hooks/refs -- Animated.Value を最初の描画で 1 つ作り、以後は同じものを持ち続ける（描画中に作り替えない）
   const p = useRef(new Animated.Value(0)).current;
   const [done, setDone] = useState(false);
   useEffect(() => {
@@ -47,18 +48,22 @@ function Piece({ spec, fallH }: { spec: PieceSpec; fallH: number }) {
 
   // 降りる先は、回転した角まで含めて枠の下端に収まる位置（fallH は枠の高さ）。
   const endY = Math.max(0, fallH - spec.size * (1 + ROTATE_OVERHANG));
+  // eslint-disable-next-line react-hooks/refs -- 上の useRef で持つ Animated.Value を補間するだけ（描画中に ref の中身は変わらない）
   const translateY = p.interpolate({
     inputRange: [0, 1],
     outputRange: [-40, endY],
   });
+  // eslint-disable-next-line react-hooks/refs -- 上の useRef で持つ Animated.Value を補間するだけ（描画中に ref の中身は変わらない）
   const translateX = p.interpolate({
     inputRange: [0, 0.5, 1],
     outputRange: [0, spec.drift, 0],
   });
+  // eslint-disable-next-line react-hooks/refs -- 上の useRef で持つ Animated.Value を補間するだけ（描画中に ref の中身は変わらない）
   const rotate = p.interpolate({
     inputRange: [0, 1],
     outputRange: ["0deg", `${spec.spin}deg`],
   });
+  // eslint-disable-next-line react-hooks/refs -- 上の useRef で持つ Animated.Value を補間するだけ（描画中に ref の中身は変わらない）
   const opacity = p.interpolate({
     inputRange: [0, 0.85, 1],
     outputRange: [1, 1, 0],
@@ -95,13 +100,16 @@ export default function Confetti({ count = 18 }: { count?: number }) {
     if (width <= 0) return [];
     const palette = colors.confetti;
     return Array.from({ length: count }, (_, i) => {
+      // eslint-disable-next-line react-hooks/purity -- 小片の乱数。useMemo で count・width が変わるまで同じ値を使い回す（再描画では動かない）
       const size = 10 + Math.random() * 10;
       // 小片の左端は inset..(枠の幅−大きさ−inset)。inset は回転で角が出る分。左右の揺れ（drift）も同じ範囲に収める。
       const inset = size * ROTATE_OVERHANG;
       const minX = inset;
       const maxX = Math.max(minX, width - size - inset);
+      // eslint-disable-next-line react-hooks/purity -- 小片の乱数。useMemo で count・width が変わるまで同じ値を使い回す（再描画では動かない）
       const x = minX + Math.random() * (maxX - minX);
       const drift = Math.min(
+        // eslint-disable-next-line react-hooks/purity -- 小片の乱数。useMemo で count・width が変わるまで同じ値を使い回す（再描画では動かない）
         Math.max((Math.random() - 0.5) * 90, minX - x),
         maxX - x,
       );
@@ -109,9 +117,12 @@ export default function Confetti({ count = 18 }: { count?: number }) {
         x,
         size,
         color: palette[i % palette.length],
+        // eslint-disable-next-line react-hooks/purity -- 小片の乱数。useMemo で count・width が変わるまで同じ値を使い回す（再描画では動かない）
         delay: Math.random() * 500,
+        // eslint-disable-next-line react-hooks/purity -- 小片の乱数。useMemo で count・width が変わるまで同じ値を使い回す（再描画では動かない）
         duration: 1500 + Math.random() * 1200,
         drift,
+        // eslint-disable-next-line react-hooks/purity -- 小片の乱数。useMemo で count・width が変わるまで同じ値を使い回す（再描画では動かない）
         spin: 360 + Math.random() * 360,
       };
     });

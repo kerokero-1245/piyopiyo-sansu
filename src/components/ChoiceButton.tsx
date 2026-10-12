@@ -58,6 +58,7 @@ export default function ChoiceButton({
   reserveRows = 1,
   compact = false,
 }: Props) {
+  // eslint-disable-next-line react-hooks/refs -- Animated.Value を最初の描画で 1 つ作り、以後は同じものを持ち続ける（描画中に作り替えない）
   const shake = useRef(new Animated.Value(0)).current;
   const prevNonce = useRef(0);
 
@@ -100,6 +101,7 @@ export default function ChoiceButton({
     }
   }, [shakeNonce, shake]);
 
+  // eslint-disable-next-line react-hooks/refs -- 上の useRef で持つ Animated.Value を補間するだけ（描画中に ref の中身は変わらない）
   const translateX = shake.interpolate({
     inputRange: [-1, 1],
     outputRange: [-8, 8],

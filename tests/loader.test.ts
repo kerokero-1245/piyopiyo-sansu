@@ -75,6 +75,7 @@ describe("差し替え", () => {
   });
 
   it("素材ではない require は、黙って通さずに落ちる", () => {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports -- 素材ではない require が落ちることの確認なので、わざと require で呼ぶ
     assert.throws(() => require("react-native"), /素材ではないので/);
   });
 });

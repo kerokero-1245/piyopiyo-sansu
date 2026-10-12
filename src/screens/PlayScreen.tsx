@@ -95,6 +95,7 @@ export default function PlayScreen({ onHome }: Props) {
   const ttsRef = useRef<boolean>(getTtsOn());
   // 直前セットの主役（次セットで別種を選ぶための持ち回り）。
   const prevCharRef = useRef<CharDef | undefined>(undefined);
+  // eslint-disable-next-line react-hooks/refs -- 初回の描画でだけ走る初期化の中で、マウント時の設定（maxSumRef）を読み、直前の主役（prevCharRef）を控える
   const [story, setStory] = useState<StorySet>(() => {
     const s = generateStorySet(maxSumRef.current, SET_SIZE);
     prevCharRef.current = s.char;
@@ -147,6 +148,7 @@ export default function PlayScreen({ onHome }: Props) {
   // 問題ごとの数でボタンの高さが変わると、flex:1 のステージが伸び縮みし、モノの大きさと
   // 置き場所がズレて下の段が切れる（20まで の 515x684 で実際に発生）。行数を固定して防ぐ。
   // 5まで=1行 / 10まで=2行 は従来の下限 34 に収まるので、見た目は1pxも変わらない。
+  // eslint-disable-next-line react-hooks/refs -- maxSumRef はマウント時に読んだ設定を持つだけ（描画中に書き換えない）
   const choiceDotRows = Math.ceil(maxSumRef.current / 5);
 
   const onStageLayout = (e: LayoutChangeEvent) => {
