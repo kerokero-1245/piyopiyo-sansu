@@ -91,9 +91,7 @@ src/
   audio/clips.ts            ①同梱クリップ（VOICEVOX 事前生成）を鳴らす（tier1）
   audio/voiceClips.ts       同梱クリップの登録表（7個。require で登録）
   audio/speech.ts           ②ブラウザ内蔵 speechSynthesis（ja-JP）で読む（tier2）
-  audio/bgm.ts              BGM の入口（さんすう用の薄いラッパ。開始/トグルを engine へ）
-  audio/bgm/engine.ts       ぴよぴよランド共通BGMエンジン（オルゴール風・Web Audio 手続き生成ループ）
-  audio/bgm/songs.ts        4曲のスコアデータ（さんすう＝F メジャーペンタ・76BPM「ほのぼの」）
+  audio/bgm.ts              BGM の入口（さんすう用の薄いラッパ。開始/トグルを engine へ）。エンジン（オルゴール風・Web Audio 手続き生成ループ）と4曲のスコアデータは src/ に置かず、共有パッケージ piyo-assets（`@kerokero-1245/piyo-assets/bgm/engine`）から読む
   components/
     BigButton.tsx           共通の大ボタン
     ChoiceButton.tsx        選択肢の巨大ボタン（●●●＋数字）
@@ -125,7 +123,7 @@ public/                     Web 書き出しの HTML の型・manifest・アイ�
 
 ## BGM（おんがく）
 
-ぴよぴよランド4アプリ共通の**オルゴール風BGM**（[audio/bgm/](src/audio/bgm/)）。さんすうは `sansu`（F メジャーペンタ・76BPM・16小節シームレスループ「ほのぼの」）。音源ファイルは同梱せず、**Web Audio API でその場合成する手続き生成ループ**（外部送信ゼロ・完全オフライン）。効果音・声と同じ AudioContext を共有する。
+ぴよぴよランド4アプリ共通の**オルゴール風BGM**（`audio/bgm.ts` → 共有パッケージ piyo-assets の [bgm/](https://github.com/kerokero-1245/piyo-assets/tree/v0.2.0/bgm)。`package.json` の git 依存で、タグ v0.2.0 に固定した版を読む）。さんすうは `sansu`（F メジャーペンタ・76BPM・16小節シームレスループ「ほのぼの」）。音源ファイルは同梱せず、**Web Audio API でその場合成する手続き生成ループ**（外部送信ゼロ・完全オフライン）。効果音・声と同じ AudioContext を共有する。
 
 - **開始**: タイトルのタップ／「あそぶ」の最初のユーザー操作（読み上げのアンロックと同じハンドラ）で `startSansuBgm()`。ブラウザの自動再生制限を守る。同一曲の再呼び出しは冪等。
 - **ダッキング**: 声（せいかい／おしい・あれれ／タイトル／ぜんぶできたね＋TTS）の再生中は BGM を控えめに下げ、終わったら戻す（効果音は下げない）。「せいかい！→数え上げ」の順序は変えていない。
