@@ -12,7 +12,7 @@
 import { isClipAvailable, playClip, warmUpClips, cancelClip } from "./clips";
 import { CLIP_URLS } from "./voiceClips";
 import { speak, warmUpSpeech, cancelSpeech, isSpeechAvailable } from "./speech";
-import { duckBgm, unduckBgm } from "./bgm/engine";
+import { duckBgm, unduckBgm } from "@kerokero-1245/piyo-assets/bgm/engine";
 import { Op } from "../types";
 
 // 読み上げ1回ぶんの指定。clip=同梱クリップの基名（無ければ tier2 へ）/ text=フォールバック読み上げ文字列。

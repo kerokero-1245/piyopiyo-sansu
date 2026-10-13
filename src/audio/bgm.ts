@@ -10,7 +10,12 @@
 //   - 声（clips/TTS）の再生中は voice.ts が duckBgm()／unduckBgm() で自動的に音量を下げる。
 //   - オン/オフは おとなモードの設定（settings: sansu.bgm、既定オン）。
 
-import { configureBgm, startBgm, stopBgm, setBgmEnabled } from "./bgm/engine";
+import {
+  configureBgm,
+  startBgm,
+  stopBgm,
+  setBgmEnabled,
+} from "@kerokero-1245/piyo-assets/bgm/engine";
 import { getAudioContext } from "./sounds";
 import { getBgmOn } from "../settings";
 
