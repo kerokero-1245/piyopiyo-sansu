@@ -6,10 +6,12 @@
 // 取得失敗時は既定値にフォールバック。消えても遊びは壊れない（罰・失敗表示はしない）。
 
 import { Platform } from "react-native";
+import { TOTAL_STARS } from "@kerokero-1245/piyo-assets/keys";
 
 export type MaxSum = 5 | 10 | 20;
 const KEY = "sansu.maxSum";
-const STAR_KEY = "sansu.totalStars";
+// 値の正本は piyo-assets/keys。街（ランド）が同じ定数を読む
+const STAR_KEY = TOTAL_STARS.sansu;
 const STAR_RESET_AT_KEY = "sansu.starsResetAt";
 const TTS_KEY = "sansu.tts";
 const BGM_KEY = "sansu.bgm";
