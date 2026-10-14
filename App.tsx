@@ -27,7 +27,7 @@ import OtonaScreen from "./src/screens/OtonaScreen";
 // piyo-assets の ui/ の部品（紙吹雪など）に渡す見た目の値。値の正本は src/theme.ts。
 // 街へのリンクの枠と押下の色は、ステージの枠（stageBorder）と選択肢の押下（choicePressed）の色。
 // 白い大ボタンの押下色は theme に無く、元の部品の直書きの値をそのまま渡す。
-// モジュールの定数にして、描画のたびに作り直さない（作り直すと紙吹雪の配置まで変わる）。
+// モジュールの定数にして、描画のたびに作り直さない（作り直すと、部品が style を毎回作り直す。confetti の配列まで作り直すと、紙吹雪の配置も変わる）。
 const UI_TOKENS: PiyoUiTokens = {
   colors: {
     surface: colors.surface,

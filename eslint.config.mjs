@@ -19,7 +19,7 @@ export default defineConfig([
   {
     // react-hooks/refs は、プラグイン（eslint-plugin-react-hooks 7）の README が "React Compiler rules" に
     // 分類している規則。この repo は React Compiler を使わない（expo の設定に experiments.reactCompiler がない）。
-    // 一方、Animated.Value を useRef(new Animated.Value(..)).current で作る形が 6 か所ある（RN の定番の形）。
+    // 一方、Animated.Value を useRef(new Animated.Value(..)).current で作る形が 4 か所ある（RN の定番の形）。
     // この規則はその宣言と、値を描画で使う行（interpolate・style）を「描画中に ref を読む」と見なし、
     // 導入時に 33 件（19 行・5 ファイル）出た。うち 3 行（ClearOverlay の total、PlayScreen の maxSumRef・prevCharRef）
     // だけは別の形（マウント時の値・直前の値を ref に持ち、描画の中で読み書きする）。この repo の書き方に合わない規則なので off にする。
