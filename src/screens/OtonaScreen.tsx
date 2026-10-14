@@ -14,8 +14,8 @@ import {
   useWindowDimensions,
   View,
 } from "react-native";
+import { BigButton } from "@kerokero-1245/piyo-assets/ui";
 import { colors, font, radius, space } from "../theme";
-import BigButton from "../components/BigButton";
 import {
   getBgmOn,
   getMaxSum,
