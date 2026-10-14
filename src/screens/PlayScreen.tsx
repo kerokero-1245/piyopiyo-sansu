@@ -20,7 +20,7 @@ import {
   useWindowDimensions,
   View,
 } from "react-native";
-import { Confetti } from "@kerokero-1245/piyo-assets/ui";
+import { Confetti, ProgressStar } from "@kerokero-1245/piyo-assets/ui";
 import { colors, font, radius, space } from "../theme";
 import { generateStorySet } from "../game/problems";
 import { sizingPlan } from "../game/grid";
@@ -37,7 +37,6 @@ import { CharDef, Op, StorySet } from "../types";
 import ThingsStage, { ThingsStageHandle } from "../components/ThingsStage";
 import ChoiceButton from "../components/ChoiceButton";
 import ClearOverlay from "../components/ClearOverlay";
-import ProgressStar from "../components/ProgressStar";
 
 interface Props {
   onHome: () => void;
@@ -278,6 +277,7 @@ export default function PlayScreen({ onHome }: Props) {
               <ProgressStar
                 key={i}
                 state={i < starsEarned ? "star" : i === index ? "now" : "off"}
+                variant="sticker"
               />
             ))}
           </View>
