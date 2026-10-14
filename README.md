@@ -12,7 +12,7 @@
 
 ブラウザで開いてそのまま遊べる。スマホなら「ホーム画面に追加」で全画面起動。`main` に push すると GitHub Actions（[.github/workflows/deploy.yml](.github/workflows/deploy.yml)）が Web を書き出して自動デプロイする。
 
-typecheck（`npm run typecheck`）と Web の書き出しが通ったときだけ公開し、PR でも同じ検査を回す。
+整形の検査（Prettier）・静的解析（ESLint）・型チェック・テストが通り、Web の書き出しができたときだけ公開し、PR でも同じ検査を回す。
 
 - 設計（コンセプト・画面・問題生成ロジック・4歳UX・ロードマップ）: [docs/DESIGN.md](docs/DESIGN.md)
 - 作り方の規則と、この repo で違うこと: [docs/DESIGN.md](docs/DESIGN.md#この-repo-での適用)
@@ -36,11 +36,11 @@ typecheck（`npm run typecheck`）と Web の書き出しが通ったときだ�
 - 罰・タイマー・スコア・ゲームオーバーなし。まちがいは「正しい数え方をもう一度見る」入口。
 - 既存キャラIP（アンパンマン等）は使わない。キャラ（モノ）は自作 SVG のシールポップ素材（piyo-assets から同梱）。
 - 完全オフライン: バックエンド・アカウント・通信・外部送信なし。設定は端末内のみ。
-- 技術: Expo SDK 57 (React Native + TypeScript)、Node 22.23.3、アニメは標準 `Animated`。
+- 技術: Expo SDK 57 (React Native + TypeScript)、Node 24.21.0、アニメは標準 `Animated`。
 
 ## 動かし方
 
-前提: **Node 22.23.3**。nvm なら `nvm use`（`.nvmrc` に 22.23.3）。
+前提: **Node の版は `.nvmrc` に従う**（nvm なら `nvm use`）。
 
 ```sh
 npm install          # 初回のみ

@@ -314,7 +314,6 @@ web は `localStorage`、native は将来 AsyncStorage。取得失敗時は既�
 
 ## 12. 準備が必要なもの（作り手側）
 
-- Node v22（`.nvmrc` 22.23.3）。
 - GitHub リポジトリ（Pages 有効・Actions デプロイ）。
 - 姪っ子が使う端末（iPhone/iPad 等）— URL を開いてホーム画面に追加。
 - （フェーズ2）おじの声の録音「せいかい!」「すごいね!」等。
