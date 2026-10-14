@@ -15,6 +15,7 @@
 typecheck（`npm run typecheck`）と Web の書き出しが通ったときだけ公開し、PR でも同じ検査を回す。
 
 - 設計（コンセプト・画面・問題生成ロジック・4歳UX・ロードマップ）: [docs/DESIGN.md](docs/DESIGN.md)
+- 作り方の規則と、この repo で違うこと: [docs/DESIGN.md](docs/DESIGN.md#この-repo-での適用)
 
 ## 状態
 
