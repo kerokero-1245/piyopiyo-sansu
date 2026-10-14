@@ -6,8 +6,12 @@
 import React, { useCallback, useState } from "react";
 import { StatusBar } from "expo-status-bar";
 import { StyleSheet, useWindowDimensions, View } from "react-native";
+import {
+  PiyoUiProvider,
+  type PiyoUiTokens,
+} from "@kerokero-1245/piyo-assets/ui";
 import { Route } from "./src/types";
-import { colors, space } from "./src/theme";
+import { colors, font, radius, space } from "./src/theme";
 import {
   FRAME_MAX_W,
   FRAME_MAX_W_WIDE,
@@ -19,6 +23,28 @@ import {
 import TitleScreen from "./src/screens/TitleScreen";
 import PlayScreen from "./src/screens/PlayScreen";
 import OtonaScreen from "./src/screens/OtonaScreen";
+
+// piyo-assets の ui/ の部品（紙吹雪など）に渡す見た目の値。値の正本は src/theme.ts。
+// 街へのリンクの枠と押下の色は、ステージの枠（stageBorder）と選択肢の押下（choicePressed）の色。
+// 白い大ボタンの押下色は theme に無く、元の部品の直書きの値をそのまま渡す。
+// モジュールの定数にして、描画のたびに作り直さない（作り直すと紙吹雪の配置まで変わる）。
+const UI_TOKENS: PiyoUiTokens = {
+  colors: {
+    surface: colors.surface,
+    text: colors.text,
+    white: colors.white,
+    townBorder: colors.stageBorder,
+    townPressed: colors.choicePressed,
+    buttonPressed: colors.buttonPressed,
+    cardButtonPressed: "#F0EADD",
+    progressNow: colors.progressNow,
+    progressOff: colors.progressOff,
+    confetti: colors.confetti,
+  },
+  font,
+  space,
+  radius,
+};
 
 export default function App() {
   const [route, setRoute] = useState<Route>({ name: "title" });
@@ -46,18 +72,20 @@ export default function App() {
   }
 
   return (
-    <View style={styles.root}>
-      <View
-        style={[
-          styles.frame,
-          compact && styles.frameCompact,
-          compact && route.name === "play" && styles.frameWide,
-        ]}
-      >
-        {screen}
+    <PiyoUiProvider tokens={UI_TOKENS}>
+      <View style={styles.root}>
+        <View
+          style={[
+            styles.frame,
+            compact && styles.frameCompact,
+            compact && route.name === "play" && styles.frameWide,
+          ]}
+        >
+          {screen}
+        </View>
+        <StatusBar style="dark" />
       </View>
-      <StatusBar style="dark" />
-    </View>
+    </PiyoUiProvider>
   );
 }
 
