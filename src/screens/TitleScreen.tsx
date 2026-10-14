@@ -8,7 +8,7 @@
 // 背の低い横向き（src/layout.ts の isCompactLandscape）では、「あそぶ」がスクロールせずに見えるよう縦を詰める:
 // 概念の絵2組を横1列に、余白を小さく、歯車は「まちへ もどる」の行の右端へ（Tab の順は変えない）。
 
-import React, { useRef } from "react";
+import React from "react";
 import {
   Image,
   ImageSourcePropType,
@@ -24,6 +24,7 @@ import {
   SHOW_TOWN,
   TOWN_LINK_HEIGHT,
   TownLink,
+  useLongPress,
 } from "@kerokero-1245/piyo-assets/ui";
 import { colors, font, space } from "../theme";
 import { playSound } from "../audio/sounds";
@@ -36,8 +37,6 @@ interface Props {
   onPlay: () => void;
   onOtona: () => void;
 }
-
-const HOLD_MS = 3000;
 
 // 題字を1行に収める文字の大きさ。題字は枠の左右の余白（space.md）まで使い、画面の端から TITLE_EDGE だけ離す。
 // 1字 = 1em（8字）＋字間 2×8 で見積もる（保守的）。Mac のヒラギノの UI 用書体はかなが約 0.92em と狭いが、
@@ -84,23 +83,10 @@ function ConceptGroup({
 }
 
 export default function TitleScreen({ onPlay, onOtona }: Props) {
-  const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // 親ゲート: 歯車を 3 秒（useLongPress の既定）押し続けるとおとなモードへ。
+  const otonaHold = useLongPress(onOtona);
   const { width: windowW, height: windowH } = useWindowDimensions();
   const compact = isCompactLandscape(windowW, windowH);
-
-  const clearHold = () => {
-    if (timer.current) {
-      clearTimeout(timer.current);
-      timer.current = null;
-    }
-  };
-  const startHold = () => {
-    clearHold();
-    timer.current = setTimeout(() => {
-      timer.current = null;
-      onOtona();
-    }, HOLD_MS);
-  };
 
   // タイトルをタップすると「ぴよぴよさんすう」を読み上げる（ジェスチャ起点＝自動再生制限を守る）。
   // 最初のタップでもあるので warmUpVoice() で読み上げをアンロックしてから読む。読み上げオフなら黙る。
@@ -183,8 +169,8 @@ export default function TitleScreen({ onPlay, onOtona }: Props) {
             背の低い横向きでは「まちへ もどる」の行の右端に置く） */}
         <View style={[styles.gearRow, compact && styles.gearRowCompact]}>
           <Pressable
-            onPressIn={startHold}
-            onPressOut={clearHold}
+            onPressIn={otonaHold.onPressIn}
+            onPressOut={otonaHold.onPressOut}
             accessibilityRole="button"
             accessibilityLabel="おとなモード（長押し）"
             hitSlop={12}
