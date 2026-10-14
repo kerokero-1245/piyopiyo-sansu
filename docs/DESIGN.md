@@ -20,8 +20,8 @@
 - **公開 HTML とアイコン**: 書き出しの HTML の型は `public/index.html`（`lang="ja"`・説明文・OGP・manifest と apple-touch-icon へのリンク・読み込み中の背景をアプリの地の色 `#FFF6E5` に）。`public/` の `manifest.webmanifest`・`icon-192.png`・`icon-512.png`・`apple-touch-icon.png`・OGP 画像 `og.png` は書き出しにそのままコピーされる。href は相対パス。og:url と og:image は SNS が読むので絶対 URL（`https://kerokero-1245.github.io/piyopiyo-sansu/…`）、Expo が差し込む favicon と JS は書き出し時のベースパス `/piyopiyo-sansu/` から始まる。favicon とアプリアイコン（`assets/*.png`・`public/` の PNG）は、街のケーキやさんと同じ自作 SVG（piyo-assets の `cake.svg`）から作る（OS の絵文字は使わない）。
 - **街へ戻る導線**: タイトル画面の左上に「まちへ もどる」（Web のみ）。同じオリジンの `/`（ぴよぴよランド）へ移る。あそんでいる途中の画面（もんだい・がんばりカード・おとなモード）には置かない。
   - タイトル画面の上に「まちへ もどる」専用の行（高さ 44＋余白）を取り、題字以下はその下に流す（横向きでも題字に重ならない。高さが足りなければ全体をスクロール）。
-  - `href="/"` を持つ本物のリンク（`<a>`）として出す（部品は `src/components/TownLink.tsx`）。マウス・タッチ・Enter はリンクの標準の動き、Space でもボタンと同じく移る。Tab の順は「まちへ もどる → 題字 → あそぶ → 歯車」。
-  - 絵つき（WORLD.md §2.2「導線はアイコン＋短いひらがな」）。街の 404 ページの「まちへ もどる」と同じ自作 SVG の木（`assets/svg/ki.svg` ＝ 街の `/assets/img/ki.svg` と同じファイル）を、同じ並び（絵 → 文字）で添える。絵文字は使わない。
+  - `href="/"` を持つ本物のリンク（`<a>`）として出す（部品は piyo-assets の `ui/TownLink`）。マウス・タッチ・Enter はリンクの標準の動き、Space でもボタンと同じく移る。Tab の順は「まちへ もどる → 題字 → あそぶ → 歯車」。
+  - 絵つき（WORLD.md §2.2「導線はアイコン＋短いひらがな」）。街の 404 ページの「まちへ もどる」と同じ自作 SVG の木（piyo-assets の `svg/ki.svg` ＝ 街の `/assets/img/ki.svg` と同じファイル）を、同じ並び（絵 → 文字）で添える。絵文字は使わない。
 - **完全オフライン**: バックエンド・アカウント・通信・外部送信はゼロ。おとなモードの設定（数の範囲・よみあげ・BGM）と、⭐ の累計（街へ渡す燃料）・表示を 0 に もどした控えだけを端末内（web は `localStorage` 相当）に保存する（キーは §7）。消えても遊びは壊れない設計。
 
 ---

@@ -93,14 +93,10 @@ src/
   audio/voiceClips.ts       同梱クリップの登録表（7個。require で登録）
   audio/speech.ts           ②ブラウザ内蔵 speechSynthesis（ja-JP）で読む（tier2）
   audio/bgm.ts              BGM の入口（さんすう用の薄いラッパ。開始/トグルを engine へ）。エンジン（オルゴール風・Web Audio 手続き生成ループ）と4曲のスコアデータは src/ に置かず、共有パッケージ piyo-assets（`@kerokero-1245/piyo-assets/bgm/engine`）から読む
-  components/
-    BigButton.tsx           共通の大ボタン
+  components/               大ボタン・進捗ドット（クリアすると⭐に変わる）・紙吹雪・「まちへ もどる」・おとなモードの長押しは src/ に置かず、共有パッケージ piyo-assets（`@kerokero-1245/piyo-assets/ui`）から読む（見た目の値は App.tsx の PiyoUiProvider で theme から渡す）
     ChoiceButton.tsx        選択肢の巨大ボタン（●●●＋数字）
     ThingsStage.tsx         モノの増減アニメ＋数え上げ（Animated）
-    ProgressStar.tsx        進捗ドット（クリアすると⭐に変わる）
-    Confetti.tsx            紙吹雪
     ClearOverlay.tsx        5問おわったときの「きょうの がんばりカード」（⭐・できたね!・あつめた ほし）
-    TownLink.tsx            「まちへ もどる」（街の木の絵つき・href="/" のリンク。Web のみ）
   screens/
     TitleScreen.tsx         タイトル（あそぶ / まちへ もどる / 親ゲート）
     PlayScreen.tsx          もんだい本体（増減→数える→3択→次へ）
