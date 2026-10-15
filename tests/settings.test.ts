@@ -2,11 +2,16 @@
 //
 // settings.ts は読んだ値をモジュールの中に覚える（セッション内キャッシュ）ので、テストごとに別の
 // モジュールとして読み直す（"?instance=N" を付けて import すると、tests/register.mjs が別の実体として扱う）。
-// localStorage は偽物をグローバルに置いて、読み書きの記録を取る。react-native の Platform は
-// tests/stubs/react-native.mjs（OS は "web" から始まる）。
+// localStorage は偽物（piyo-assets の testing/storage の FakeStorage）をグローバルに置いて、読み書きの記録を取る。
+// react-native の Platform は tests/stubs/react-native.mjs（OS は "web" から始まる）。
 
 import { afterEach, describe, it } from "node:test";
 import assert from "node:assert/strict";
+import {
+  FakeStorage,
+  installLocalStorage,
+  installThrowingLocalStorage,
+} from "@kerokero-1245/piyo-assets/testing/storage";
 import { Platform } from "./stubs/react-native.mjs";
 
 type Settings = typeof import("../src/settings");
@@ -21,44 +26,11 @@ const KEY = {
 } as const;
 
 // ── 偽の localStorage ───────────────────────────────────
-class FakeStorage {
-  readonly data = new Map<string, string>();
-  readonly log: string[] = [];
-  failGet = false;
-  failSet = false;
-  failRemove = false;
-
-  constructor(initial: Record<string, string> = {}) {
-    for (const [key, value] of Object.entries(initial)) {
-      this.data.set(key, value);
-    }
-  }
-
-  getItem(key: string): string | null {
-    this.log.push(`get ${key}`);
-    if (this.failGet) throw new Error("getItem failed");
-    return this.data.get(key) ?? null;
-  }
-
-  setItem(key: string, value: string): void {
-    this.log.push(`set ${key}=${value}`);
-    if (this.failSet) throw new Error("setItem failed");
-    this.data.set(key, value);
-  }
-
-  removeItem(key: string): void {
-    this.log.push(`remove ${key}`);
-    if (this.failRemove) throw new Error("removeItem failed");
-    this.data.delete(key);
-  }
-}
+// 置き換えるたびに戻す関数を控え、テストの後で全部呼んで元に戻す（次のテストに漏らさない）。
+const restores: (() => void)[] = [];
 
 function installStorage(value: FakeStorage | undefined): void {
-  Object.defineProperty(globalThis, "localStorage", {
-    value,
-    configurable: true,
-    writable: true,
-  });
+  restores.push(installLocalStorage(value));
 }
 
 let instance = 0;
@@ -80,7 +52,7 @@ async function open(
 
 afterEach(() => {
   Platform.OS = "web";
-  Reflect.deleteProperty(globalThis, "localStorage");
+  while (restores.length > 0) restores.pop()?.();
 });
 
 const numberAt = (storage: FakeStorage, key: string): number =>
@@ -132,7 +104,7 @@ describe("保存キーと値の形式（保存データの互換）", () => {
     settings.getTtsOn();
     settings.getBgmOn();
     assert.deepEqual(
-      storage.log.filter((entry) => !entry.startsWith("get ")),
+      storage.log.filter((entry) => entry.op !== "get"),
       [],
     );
   });
@@ -351,12 +323,7 @@ describe("保存が使えなくても壊れない（罰・失敗表示はしな�
 
   it("localStorage を参照するだけで例外になる環境でも、既定値で動く", async () => {
     const { settings } = await open();
-    Object.defineProperty(globalThis, "localStorage", {
-      get() {
-        throw new Error("SecurityError");
-      },
-      configurable: true,
-    });
+    restores.push(installThrowingLocalStorage());
     assert.equal(settings.getMaxSum(), 5);
     settings.setMaxSum(20);
     assert.equal(settings.getMaxSum(), 20);
