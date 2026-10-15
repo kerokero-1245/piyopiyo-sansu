@@ -20,7 +20,9 @@ import {
   useWindowDimensions,
   View,
 } from "react-native";
-import { Confetti, ProgressStar } from "@kerokero-1245/piyo-assets/ui";
+import { Confetti } from "@kerokero-1245/piyo-assets/ui/Confetti";
+import { ProgressStar } from "@kerokero-1245/piyo-assets/ui/ProgressStar";
+import { STICKER_MARK } from "@kerokero-1245/piyo-assets/ui/ProgressStarSticker";
 import { colors, font, radius, space } from "../theme";
 import { generateStorySet } from "../game/problems";
 import { sizingPlan } from "../game/grid";
@@ -277,7 +279,7 @@ export default function PlayScreen({ onHome }: Props) {
               <ProgressStar
                 key={i}
                 state={i < starsEarned ? "star" : i === index ? "now" : "off"}
-                variant="sticker"
+                mark={STICKER_MARK}
               />
             ))}
           </View>

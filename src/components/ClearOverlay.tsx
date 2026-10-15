@@ -23,7 +23,8 @@ import {
   View,
   ViewStyle,
 } from "react-native";
-import { BigButton, Confetti } from "@kerokero-1245/piyo-assets/ui";
+import { BigButton } from "@kerokero-1245/piyo-assets/ui/BigButton";
+import { Confetti } from "@kerokero-1245/piyo-assets/ui/Confetti";
 import { colors, font, space } from "../theme";
 import { getShownStars, getTtsOn } from "../settings";
 import { playCountTone, playSound } from "../audio/sounds";
