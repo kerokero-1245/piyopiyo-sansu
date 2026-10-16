@@ -10,32 +10,12 @@
 import { describe, it } from "node:test";
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
+import {
+  seededRandom as seeded,
+  withRandom,
+} from "@kerokero-1245/piyo-assets/testing/random";
 import { generateStorySet, makeChoices } from "../src/game/problems";
 import type { CharDef, StorySet } from "../src/types";
-
-// ── 乱数 ──────────────────────────────────────────────────
-// mulberry32: 種から決まる 0 以上 1 未満の列。
-function seeded(seed: number): () => number {
-  let a = seed >>> 0;
-  return () => {
-    a = (a + 0x6d2b79f5) >>> 0;
-    let t = a;
-    t = Math.imul(t ^ (t >>> 15), t | 1);
-    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
-    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
-  };
-}
-
-// run の間だけ Math.random を置き換える（終わったら必ず戻す）。
-function withRandom<T>(random: () => number, run: () => T): T {
-  const original = Math.random;
-  Math.random = random;
-  try {
-    return run();
-  } finally {
-    Math.random = original;
-  }
-}
 
 // ── 標本 ──────────────────────────────────────────────────
 const MAX_SUMS = [5, 10, 20] as const;
