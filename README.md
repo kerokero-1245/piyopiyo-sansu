@@ -105,7 +105,7 @@ src/
 public/                     Web 書き出しの HTML の型・manifest・アイコン・OGP 画像
 ```
 
-大ボタン・進捗ドット（クリアすると⭐に変わる）・紙吹雪・「まちへ もどる」（街へのリンク）・おとなモードの長押しは src/ に置かず、共有パッケージ piyo-assets の部品ごとの入口 `@kerokero-1245/piyo-assets/ui/<部品名>`（`ui/BigButton`・`ui/ProgressStar`・`ui/Confetti`・`ui/TownLink`・`ui/useLongPress`）から読む（見た目の値は App.tsx の `PiyoUiProvider`（`ui/tokens`）で `src/theme.ts` から渡す。進捗の⭐は画像で出すので、`ui/ProgressStarSticker` の `STICKER_MARK` を `mark` に渡す）。
+大ボタン・進捗ドット（クリアすると⭐に変わる）・紙吹雪・「まちへ もどる」（街へのリンク）・おとなモードの長押しは src/ に置かず、共有パッケージ piyo-assets の部品ごとの入口 `@kerokero-1245/piyo-assets/ui/<部品名>`（`ui/BigButton`・`ui/ProgressStar`・`ui/Confetti`・`ui/TownLink`・`ui/useLongPress`）から読む（見た目の値は App.tsx の `PiyoUiProvider`（`ui/tokens`）で `src/theme.ts` から渡す。進捗の⭐は画像で出すので、`ui/ProgressStarSticker` の `STICKER_MARK` を `mark` に渡す）。まとめての入口 `@kerokero-1245/piyo-assets/ui` からは読まない（使わない部品の絵まで書き出されるため）。
 
 ## よみあげ（音声）
 
